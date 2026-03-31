@@ -68,5 +68,6 @@ Feel free to fork and contribute!
 
 * Original game: Shattered Pixel Dungeon by Evan Debenham
 * This project: Sacred Pixel Dungeon (HTML adaptation)
+* This project is not affiliated with or endorsed by the original developers.
 
 ---
