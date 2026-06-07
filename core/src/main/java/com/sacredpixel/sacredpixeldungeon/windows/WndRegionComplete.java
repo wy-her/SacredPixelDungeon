@@ -25,7 +25,6 @@
 package com.sacredpixel.sacredpixeldungeon.windows;
 
 import com.sacredpixel.sacredpixeldungeon.Dungeon;
-import com.sacredpixel.sacredpixeldungeon.InterstitialAd;
 import com.sacredpixel.sacredpixeldungeon.Statistics;
 import com.sacredpixel.sacredpixeldungeon.actors.hero.Hero;
 import com.sacredpixel.sacredpixeldungeon.messages.Messages;
@@ -34,7 +33,6 @@ import com.sacredpixel.sacredpixeldungeon.sprites.HeroSprite;
 import com.sacredpixel.sacredpixeldungeon.ui.RedButton;
 import com.sacredpixel.sacredpixeldungeon.ui.RenderedTextBlock;
 import com.sacredpixel.sacredpixeldungeon.ui.Window;
-import com.watabou.noosa.Game;
 import com.watabou.utils.DateCompat;
 
 public class WndRegionComplete extends Window {
@@ -88,6 +86,7 @@ public class WndRegionComplete extends Window {
 			@Override
 			protected void onClick() {
 				super.onClick();
+				enable(false);  // Prevent double-click
 				triggerClose();
 			}
 		};
@@ -101,30 +100,9 @@ public class WndRegionComplete extends Window {
 	}
 
 	private void triggerClose() {
-		// Show interstitial ad on boss floors (5, 10, 15, 20) before proceeding
-		int depth = Dungeon.depth;
-		if (depth == 5 || depth == 10 || depth == 15 || depth == 20) {
-			// Show ad first, then close window after ad is dismissed + 0.5 second delay
-			InterstitialAd.show(() -> {
-				// Delay 0.5 seconds after ad dismissed for smooth transition
-				new Thread(() -> {
-					try {
-						Thread.sleep(500);
-					} catch (InterruptedException ignored) {}
-					Game.runOnRenderThread(() -> {
-						hide();
-						if (onClose != null) {
-							onClose.run();
-						}
-					});
-				}).start();
-			});
-		} else {
-			// Non-boss floor - close immediately
-			hide();
-			if (onClose != null) {
-				onClose.run();
-			}
+		hide();
+		if (onClose != null) {
+			onClose.run();
 		}
 	}
 

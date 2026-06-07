@@ -253,8 +253,8 @@ function notifyAdComplete() {
     console.log('Interstitial ad: notifying game iframe');
 
     let attempts = 0;
-    const maxAttempts = 20; // 최대 20회 재시도 (2초)
-    const retryInterval = 100; // 100ms 간격
+    const maxAttempts = 30; // 최대 30회 재시도 (0.6초)
+    const retryInterval = 20; // 20ms 간격 (더 빠른 응답)
 
     const tryNotify = () => {
         attempts++;

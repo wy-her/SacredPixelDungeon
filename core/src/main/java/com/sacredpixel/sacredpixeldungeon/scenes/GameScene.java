@@ -31,7 +31,6 @@ import com.sacredpixel.sacredpixeldungeon.Challenges;
 import com.sacredpixel.sacredpixeldungeon.Chrome;
 import com.sacredpixel.sacredpixeldungeon.Dungeon;
 import com.sacredpixel.sacredpixeldungeon.GamesInProgress;
-import com.sacredpixel.sacredpixeldungeon.InterstitialAd;
 import com.sacredpixel.sacredpixeldungeon.Rankings;
 import com.sacredpixel.sacredpixeldungeon.SPDAction;
 import com.sacredpixel.sacredpixeldungeon.SPDSettings;
@@ -1635,13 +1634,6 @@ public class GameScene extends PixelScene {
 			scene.showBanner( bossSlain );
 
 			Sample.INSTANCE.play( Assets.Sounds.BOSS );
-
-			// Preload interstitial ad on boss floors (5, 10, 15, 20)
-			// Ad will be shown when player clicks "Next Stage" in WndRegionComplete
-			int depth = Dungeon.depth;
-			if (depth == 5 || depth == 10 || depth == 15 || depth == 20) {
-				InterstitialAd.preload();
-			}
 		}
 	}
 	

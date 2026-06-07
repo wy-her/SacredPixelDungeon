@@ -32,7 +32,7 @@ The game is **completely free** with **no advertisements** on our official websi
 
 ### Apps in Toss (Korea Only)
 
-The [Apps in Toss](https://toss.im/) version includes **non-intrusive banner and interstitial ads** to support development costs.
+The [Apps in Toss](https://toss.im/) version includes **non-intrusive banner ads** to support development costs.
 
 **Why ads on this platform?**
 - HTML5 porting requires ongoing maintenance

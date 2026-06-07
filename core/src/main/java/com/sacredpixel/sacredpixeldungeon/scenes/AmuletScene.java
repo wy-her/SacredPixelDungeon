@@ -82,7 +82,7 @@ public class AmuletScene extends PixelScene {
 		
 		RenderedTextBlock text = null;
 		if (!noText) {
-			text = renderTextBlock( Messages.get(this, "text"), 8 );
+			text = renderTextBlock( Messages.get(this, "text"), 7 );
 			text.maxWidth( PixelScene.landscape() ? 2*WIDTH-4 : WIDTH);
 		}
 		

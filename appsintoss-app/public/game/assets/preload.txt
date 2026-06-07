@@ -82,8 +82,6 @@ i:b:/messages/actors/actors_zh.properties:244333:1
 i:b:/messages/check_ko_translations.py:4565:1
 i:b:/messages/check_translations.sh:1686:1
 i:b:/messages/check_typos.sh:884:1
-i:b:/messages/compare_translations.ps1:5188:1
-i:b:/messages/detailed_check.ps1:2341:1
 i:b:/messages/detailed_check.py:5595:1
 i:b:/messages/final_check.py:4181:1
 i:b:/messages/final_report.sh:1030:1
@@ -100,7 +98,7 @@ i:b:/messages/items/items_hu.properties:260875:1
 i:b:/messages/items/items_in.properties:252272:1
 i:b:/messages/items/items_it.properties:258788:1
 i:b:/messages/items/items_ja.properties:275955:1
-i:b:/messages/items/items_ko.properties:280335:1
+i:b:/messages/items/items_ko.properties:280329:1
 i:b:/messages/items/items_nl.properties:258130:1
 i:b:/messages/items/items_pl.properties:257739:1
 i:b:/messages/items/items_pt.properties:256369:1

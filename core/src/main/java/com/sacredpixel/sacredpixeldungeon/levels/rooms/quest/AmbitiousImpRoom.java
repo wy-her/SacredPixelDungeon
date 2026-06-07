@@ -30,7 +30,6 @@ import com.sacredpixel.sacredpixeldungeon.levels.Terrain;
 import com.sacredpixel.sacredpixeldungeon.levels.painters.Painter;
 import com.sacredpixel.sacredpixeldungeon.levels.rooms.special.SpecialRoom;
 import com.watabou.utils.Point;
-import com.watabou.utils.Random;
 
 public class AmbitiousImpRoom extends SpecialRoom {
 
@@ -59,15 +58,7 @@ public class AmbitiousImpRoom extends SpecialRoom {
 
 		Door entrance = entrance();
 		Imp npc = new Imp();
-		npc.pos = level.pointToCell(c);
-
-		if (entrance.x == left || entrance.x == right){
-			npc.pos += Random.IntRange(-1, 1)*level.width();
-			npc.pos += entrance.x == left ? -2 : 2;
-		} else if (entrance.y == top || entrance.y == bottom){
-			npc.pos += Random.IntRange(-1, 1);
-			npc.pos += level.width() * (entrance.y == top ? -2 : 2);
-		}
+		npc.pos = level.pointToCell(c);  // Place Imp at exact center
 		level.mobs.add( npc );
 
 		Painter.drawInside(level, this, entrance, 1, Terrain.EMPTY);

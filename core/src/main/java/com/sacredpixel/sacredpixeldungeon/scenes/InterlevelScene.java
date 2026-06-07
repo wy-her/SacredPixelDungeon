@@ -28,7 +28,6 @@ import com.sacredpixel.sacredpixeldungeon.Assets;
 import com.sacredpixel.sacredpixeldungeon.Chrome;
 import com.sacredpixel.sacredpixeldungeon.Dungeon;
 import com.sacredpixel.sacredpixeldungeon.GamesInProgress;
-import com.sacredpixel.sacredpixeldungeon.InterstitialAd;
 import com.sacredpixel.sacredpixeldungeon.SacredPixelDungeon;
 import com.sacredpixel.sacredpixeldungeon.Statistics;
 import com.sacredpixel.sacredpixeldungeon.actors.Actor;
@@ -82,10 +81,10 @@ public class InterlevelScene extends PixelScene {
 	//fast fade when ascending, or descending to a floor you've been on
 	private static final float FAST_FADE = 0.50f; //.2 in, .3 steady, .2 out, 0.7 seconds total
 
-	//background fade duration (in/out)
-	private static final float BG_FADE_DURATION = 0.3f;
+	//background fade duration (in/out) for story sequences
+	private static final float BG_FADE_DURATION = 0.5f;
 	//story text fade duration (in/out)
-	private static final float STORY_FADE_DURATION = 0.5f;
+	private static final float STORY_FADE_DURATION = 0.8f;
 
 	//minimum time the scene must be displayed before transitioning
 	private static final float MINIMUM_DISPLAY_TIME = 0.5f;
@@ -130,11 +129,7 @@ public class InterlevelScene extends PixelScene {
 	private float displayTimeElapsed = 0f;
 	private boolean waitingForMinTime = false;
 	private boolean storyFadingOut = false;
-	private boolean adDialogShown = false;
-	private volatile boolean adCompletePending = false;  // Flag for async ad completion
-	private volatile boolean waitingForAdCallback = false;  // True while waiting for ad callback
-	private float adWaitTime = 0f;  // Time elapsed since ad was shown
-	private static final float AD_CALLBACK_TIMEOUT = 5f;  // 5 seconds timeout for ad callback
+	private boolean proceedCalled = false;  // Prevents duplicate proceedAfterLoading() calls
 	private float storyFadeOutTime = 0f;
 	private float btnContinueEnabledTime = 0f;  // Time since continue button was enabled
 	private static final float BTN_INPUT_DELAY = 0.5f;  // Delay before accepting input on continue button
@@ -189,7 +184,6 @@ public class InterlevelScene extends PixelScene {
 					if (curTransition != null)  loadingDepth = curTransition.destDepth;
 					else                        loadingDepth = Dungeon.depth+1;
 					if (Statistics.deepestFloor >= loadingDepth) {
-						fadeTime = FAST_FADE;
 						isNewFloor = false;
 					} else {
 						isNewFloor = true;
@@ -204,7 +198,6 @@ public class InterlevelScene extends PixelScene {
 				loadingDepth = Dungeon.depth+1;
 				break;
 			case ASCEND:
-				fadeTime = FAST_FADE;
 				if (curTransition != null)  loadingDepth = curTransition.destDepth;
 				else                        loadingDepth = Dungeon.depth-1;
 				break;
@@ -346,7 +339,7 @@ public class InterlevelScene extends PixelScene {
 		}
 
 		if (isStoryFloor && isNewFloor && mode == Mode.DESCEND && Dungeon.hero != null) {
-			//Skip fade-in for ad story floors (6,11,16,21) - gray bg shown instead
+			//Skip fade-in for story floors (6,11,16,21) - WndRegionComplete shown first
 			phase = Phase.STATIC;
 			if (background != null) background.alpha(0);
 			if (loadingText != null) loadingText.alpha(0);
@@ -412,25 +405,6 @@ public class InterlevelScene extends PixelScene {
 	@Override
 	public void update() {
 		super.update();
-
-		// Check for async ad completion (ensures continuation runs on game thread)
-		if (adCompletePending) {
-			adCompletePending = false;
-			waitingForAdCallback = false;
-			adWaitTime = 0f;
-			continueAfterAd();
-		}
-
-		// Safety timeout for ad callback (in case callback never arrives)
-		if (waitingForAdCallback) {
-			adWaitTime += Game.elapsed;
-			if (adWaitTime >= AD_CALLBACK_TIMEOUT) {
-				Game.reportException(new RuntimeException("Ad callback timeout after " + AD_CALLBACK_TIMEOUT + "s"));
-				waitingForAdCallback = false;
-				adWaitTime = 0f;
-				continueAfterAd();  // Continue anyway
-			}
-		}
 
 		//STAGE_CLEAR phase: create WndRegionComplete (no fade-in)
 		if (phase == Phase.STAGE_CLEAR && !stageClearWindowCreated) {
@@ -668,7 +642,7 @@ public class InterlevelScene extends PixelScene {
 			// Check if we were waiting for minimum display time and can now proceed
 			if (waitingForMinTime && displayTimeElapsed >= MINIMUM_DISPLAY_TIME) {
 				waitingForMinTime = false;
-				showAdDialog();
+				proceedAfterLoading();
 			}
 
 			if (error != null) {
@@ -788,15 +762,15 @@ public class InterlevelScene extends PixelScene {
 			textFadingIn = true;   // Enable fade-in animation for story elements
 			phase = Phase.STATIC;
 		} else if (isStoryFloor && isNewFloor && mode == Mode.DESCEND && Dungeon.hero != null) {
-			// Story floors 6,11,16,21: show WndRegionComplete first, then countdown, then story
-			showAdDialog();
+			// Story floors 6,11,16,21: show WndRegionComplete first, then story
+			proceedAfterLoading();
 		} else {
 			// Non-story floors: ensure minimum display time then fade out
 			if (displayTimeElapsed < MINIMUM_DISPLAY_TIME) {
 				waitingForMinTime = true;
 				phase = Phase.STATIC;
 			} else {
-				showAdDialog();
+				proceedAfterLoading();
 			}
 		}
 
@@ -807,11 +781,11 @@ public class InterlevelScene extends PixelScene {
 		storyFadeOutTime = 0f;
 	}
 
-	private void showAdDialog() {
-		if (adDialogShown) return;
-		adDialogShown = true;
+	private void proceedAfterLoading() {
+		if (proceedCalled) return;
+		proceedCalled = true;
 
-		// Only show ad when descending to a brand new floor
+		// Only proceed with stage clear on new floors when descending
 		if (!isNewFloor || mode != Mode.DESCEND) {
 			phase = Phase.FADE_OUT;
 			timeLeft = fadeTime;
@@ -841,23 +815,10 @@ public class InterlevelScene extends PixelScene {
 	}
 
 	// Called after WndRegionComplete closes (floors 6,11,16,21)
-	// Shows interstitial ad (if available), then creates story elements and starts fade-in
+	// Creates story elements and starts fade-in
 	private void startPostRegionComplete() {
 		stageClearPending = false;
 
-		// Show interstitial ad before story (Appsintoss only)
-		// Other platforms (Cloudflare, Capacitor) will skip immediately
-		// Use flag-based approach to ensure continuation happens on game thread
-		waitingForAdCallback = true;
-		adWaitTime = 0f;
-		InterstitialAd.show(() -> {
-			// Set flag - continuation will happen in update() on game thread
-			adCompletePending = true;
-		});
-	}
-
-	// Called after interstitial ad completes (or immediately if no ad available)
-	private void continueAfterAd() {
 		// Restore background visibility but start with alpha 0 for smooth fade-in
 		if (background != null) {
 			background.visible = true;
