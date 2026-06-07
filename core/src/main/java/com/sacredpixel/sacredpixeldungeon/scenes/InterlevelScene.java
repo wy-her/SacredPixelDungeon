@@ -194,8 +194,8 @@ public class InterlevelScene extends PixelScene {
 					} else {
 						isNewFloor = true;
 					}
-					if (loadingDepth == 6 || loadingDepth == 11
-							|| loadingDepth == 16 || loadingDepth == 21 || loadingDepth == 26) {
+					if (isNewFloor && (loadingDepth == 6 || loadingDepth == 11
+							|| loadingDepth == 16 || loadingDepth == 21 || loadingDepth == 26)) {
 						fadeTime = SLOW_FADE;
 					}
 				}
