@@ -6,6 +6,10 @@
  */
 package com.sacredpixel.sacredpixeldungeon.teavm.web;
 
+import com.sacredpixel.sacredpixeldungeon.Badges;
+import com.sacredpixel.sacredpixeldungeon.journal.Bestiary;
+import com.sacredpixel.sacredpixeldungeon.journal.Catalog;
+import com.sacredpixel.sacredpixeldungeon.journal.Document;
 import com.sacredpixel.sacredpixeldungeon.messages.Messages;
 import com.sacredpixel.sacredpixeldungeon.scenes.DataScene;
 
@@ -15,13 +19,44 @@ import com.sacredpixel.sacredpixeldungeon.scenes.DataScene;
  */
 public class WebDataServiceImpl implements DataScene.DataService {
 
-    // Total counts (must match DataScene calculations)
-    private static final int TOTAL_BADGES = 192; // Badge enum count approx
-    private static final int TOTAL_CATALOG = 400; // Max catalog items
-    private static final int TOTAL_BESTIARY = 200; // Max bestiary entries
-    private static final int TOTAL_LORE = 30; // 5 lore docs * 6 pages
-    private static final int TOTAL_GUIDE = 14; // Adventurer's guide pages
-    private static final int TOTAL_ALCHEMY = 9; // Alchemy guide pages
+    // Dynamic total calculations (same as DataScene)
+    private static int getTotalBadges() {
+        return Badges.Badge.values().length;
+    }
+
+    private static int getTotalCatalog() {
+        int total = 0;
+        for (Catalog cat : Catalog.values()) {
+            total += cat.items().size();
+        }
+        return total;
+    }
+
+    private static int getTotalBestiary() {
+        int total = 0;
+        for (Bestiary cat : Bestiary.values()) {
+            total += cat.entities().size();
+        }
+        return total;
+    }
+
+    private static int getTotalLore() {
+        int total = 0;
+        Document[] loreDocs = {Document.SEWERS_GUARD, Document.PRISON_WARDEN,
+                Document.CAVES_EXPLORER, Document.CITY_WARLOCK, Document.HALLS_KING};
+        for (Document doc : loreDocs) {
+            total += doc.pageNames().size();
+        }
+        return total;
+    }
+
+    private static int getTotalGuide() {
+        return Document.ADVENTURERS_GUIDE.pageNames().size();
+    }
+
+    private static int getTotalAlchemy() {
+        return Document.ALCHEMY_GUIDE.pageNames().size();
+    }
 
     @Override
     public String exportData() {
@@ -57,42 +92,42 @@ public class WebDataServiceImpl implements DataScene.DataService {
         sb.append("\n");
 
         // 2. Badges
-        sb.append(Messages.get(DataScene.class, "badges", preview.badgeCount, TOTAL_BADGES));
+        sb.append(Messages.get(DataScene.class, "badges", preview.badgeCount, getTotalBadges()));
         if (preview.newBadges > 0) {
             sb.append(" (+").append(preview.newBadges).append(")");
         }
         sb.append("\n");
 
         // 3. Catalog
-        sb.append(Messages.get(DataScene.class, "catalog", preview.catalogCount, TOTAL_CATALOG));
+        sb.append(Messages.get(DataScene.class, "catalog", preview.catalogCount, getTotalCatalog()));
         if (preview.newCatalogItems > 0) {
             sb.append(" (+").append(preview.newCatalogItems).append(")");
         }
         sb.append("\n");
 
         // 4. Bestiary
-        sb.append(Messages.get(DataScene.class, "bestiary", preview.bestiaryCount, TOTAL_BESTIARY));
+        sb.append(Messages.get(DataScene.class, "bestiary", preview.bestiaryCount, getTotalBestiary()));
         if (preview.newBestiaryEntries > 0) {
             sb.append(" (+").append(preview.newBestiaryEntries).append(")");
         }
         sb.append("\n");
 
         // 5. Lore
-        sb.append(Messages.get(DataScene.class, "lore", preview.loreCount, TOTAL_LORE));
+        sb.append(Messages.get(DataScene.class, "lore", preview.loreCount, getTotalLore()));
         if (preview.newLorePages > 0) {
             sb.append(" (+").append(preview.newLorePages).append(")");
         }
         sb.append("\n");
 
         // 6. Guide
-        sb.append(Messages.get(DataScene.class, "guide", preview.guideCount, TOTAL_GUIDE));
+        sb.append(Messages.get(DataScene.class, "guide", preview.guideCount, getTotalGuide()));
         if (preview.newGuidePages > 0) {
             sb.append(" (+").append(preview.newGuidePages).append(")");
         }
         sb.append("\n");
 
         // 7. Alchemy
-        sb.append(Messages.get(DataScene.class, "alchemy", preview.alchemyCount, TOTAL_ALCHEMY));
+        sb.append(Messages.get(DataScene.class, "alchemy", preview.alchemyCount, getTotalAlchemy()));
         if (preview.newAlchemyPages > 0) {
             sb.append(" (+").append(preview.newAlchemyPages).append(")");
         }
