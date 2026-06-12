@@ -25,6 +25,7 @@
 package com.sacredpixel.sacredpixeldungeon.windows;
 
 import com.sacredpixel.sacredpixeldungeon.Dungeon;
+import com.sacredpixel.sacredpixeldungeon.InterstitialAd;
 import com.sacredpixel.sacredpixeldungeon.Statistics;
 import com.sacredpixel.sacredpixeldungeon.actors.hero.Hero;
 import com.sacredpixel.sacredpixeldungeon.messages.Messages;
@@ -33,6 +34,7 @@ import com.sacredpixel.sacredpixeldungeon.sprites.HeroSprite;
 import com.sacredpixel.sacredpixeldungeon.ui.RedButton;
 import com.sacredpixel.sacredpixeldungeon.ui.RenderedTextBlock;
 import com.sacredpixel.sacredpixeldungeon.ui.Window;
+import com.watabou.noosa.Game;
 import com.watabou.utils.DateCompat;
 
 public class WndRegionComplete extends Window {
@@ -41,7 +43,13 @@ public class WndRegionComplete extends Window {
 	private static final int GAP = 4;
 	private static final int BTN_HEIGHT = 16;
 
+	// Ad load timeout - if ad not loaded within this time, skip it
+	private static final float AD_LOAD_TIMEOUT = 3.0f;
+
 	private Runnable onClose;
+	private RedButton btnNextStage;
+	private float adWaitTime = 0f;
+	private boolean waitingForAd = false;
 
 	public WndRegionComplete(Runnable onClose) {
 		super();
@@ -82,12 +90,23 @@ public class WndRegionComplete extends Window {
 
 		pos += GAP;
 
-		RedButton btnNextStage = new RedButton(Messages.get(this, "next_stage")) {
+		btnNextStage = new RedButton(Messages.get(this, "next_stage")) {
 			@Override
 			protected void onClick() {
 				super.onClick();
-				enable(false);  // Prevent double-click
-				triggerClose();
+
+				// Check if ad is available but not yet preloaded
+				if (InterstitialAd.isAvailable() && !InterstitialAd.isPreloaded()) {
+					// Start waiting for ad to load
+					waitingForAd = true;
+					adWaitTime = 0f;
+					text(Messages.get(WndRegionComplete.class, "loading_ad"));
+					enable(false);
+				} else {
+					// Ad already loaded or not available - proceed immediately
+					enable(false);
+					triggerClose();
+				}
 			}
 		};
 		btnNextStage.setRect(0, pos, WIDTH, BTN_HEIGHT);
@@ -103,6 +122,26 @@ public class WndRegionComplete extends Window {
 		hide();
 		if (onClose != null) {
 			onClose.run();
+		}
+	}
+
+	@Override
+	public void update() {
+		super.update();
+
+		if (waitingForAd) {
+			adWaitTime += Game.elapsed;
+
+			if (InterstitialAd.isPreloaded()) {
+				// Ad loaded - proceed
+				waitingForAd = false;
+				triggerClose();
+			} else if (adWaitTime >= AD_LOAD_TIMEOUT) {
+				// Timeout - block ad and proceed without it
+				waitingForAd = false;
+				InterstitialAd.block();
+				triggerClose();
+			}
 		}
 	}
 

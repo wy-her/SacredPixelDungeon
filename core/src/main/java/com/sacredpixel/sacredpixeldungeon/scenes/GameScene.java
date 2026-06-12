@@ -1643,6 +1643,7 @@ public class GameScene extends PixelScene {
 				case 10:  // Tengu (Prison boss)
 				case 15:  // DM-300 (Caves boss)
 				case 20:  // Dwarf King (City boss)
+					InterstitialAd.resetBlock();  // Reset any previous block state
 					InterstitialAd.preload();
 					break;
 			}

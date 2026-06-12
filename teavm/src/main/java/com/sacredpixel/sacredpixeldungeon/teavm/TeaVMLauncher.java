@@ -193,6 +193,13 @@ public class TeaVMLauncher {
                             cb.run();
                         }
                     }
+
+                    @Override
+                    public void block() {
+                        // Clear pending callback to prevent late-loaded ads from triggering
+                        pendingOnComplete = null;
+                        TeaVMInterstitialAd.clearComplete();
+                    }
                 };
                 log("TeaVMLauncher: Appsintoss interstitial ad configured");
             }

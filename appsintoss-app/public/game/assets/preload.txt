@@ -250,7 +250,7 @@ i:b:/messages/ui/ui_vi.properties:4342:1
 i:b:/messages/ui/ui_zh-hant.properties:3143:1
 i:b:/messages/ui/ui_zh.properties:3237:1
 i:b:/messages/untranslated_be.txt:16762:1
-i:b:/messages/windows/windows.properties:29933:1
+i:b:/messages/windows/windows.properties:29982:1
 i:b:/messages/windows/windows_be.properties:43530:1
 i:b:/messages/windows/windows_cs.properties:32603:1
 i:b:/messages/windows/windows_de.properties:34785:1
@@ -262,7 +262,7 @@ i:b:/messages/windows/windows_hu.properties:34442:1
 i:b:/messages/windows/windows_in.properties:32709:1
 i:b:/messages/windows/windows_it.properties:32987:1
 i:b:/messages/windows/windows_ja.properties:36360:1
-i:b:/messages/windows/windows_ko.properties:33278:1
+i:b:/messages/windows/windows_ko.properties:33329:1
 i:b:/messages/windows/windows_nl.properties:33096:1
 i:b:/messages/windows/windows_pl.properties:33532:1
 i:b:/messages/windows/windows_pt.properties:33322:1

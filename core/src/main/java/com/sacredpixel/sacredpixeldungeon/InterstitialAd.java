@@ -36,6 +36,10 @@ public class InterstitialAd {
     // Platform-specific implementation (set by platform launcher)
     public static InterstitialAdImpl impl = null;
 
+    // Ad blocking flag - when true, ads will not be shown
+    // Used to prevent late-loaded ads from appearing after game has progressed
+    private static boolean blocked = false;
+
     public interface InterstitialAdImpl {
         /**
          * Show an interstitial ad.
@@ -72,6 +76,40 @@ public class InterstitialAd {
         default void checkCallback() {
             // Default implementation does nothing
         }
+
+        /**
+         * Block any pending ad from showing.
+         * Clears pending callbacks so late-loaded ads won't appear.
+         */
+        default void block() {
+            // Default implementation does nothing
+        }
+    }
+
+    /**
+     * Block ads from showing. Call this when ad load times out
+     * to prevent late-loaded ads from appearing during gameplay.
+     */
+    public static void block() {
+        blocked = true;
+        if (impl != null) {
+            impl.block();
+        }
+    }
+
+    /**
+     * Reset ad blocking. Call this when preparing for a new ad
+     * (e.g., when boss is killed and preload starts).
+     */
+    public static void resetBlock() {
+        blocked = false;
+    }
+
+    /**
+     * Check if ads are currently blocked.
+     */
+    public static boolean isBlocked() {
+        return blocked;
     }
 
     /**
@@ -83,11 +121,18 @@ public class InterstitialAd {
 
     /**
      * Show an interstitial ad.
-     * If ads are not available, immediately calls onComplete.
+     * If ads are not available or blocked, immediately calls onComplete.
      *
      * @param onComplete Called when the ad is dismissed or not available.
      */
     public static void show(Runnable onComplete) {
+        // If blocked, skip ad and immediately call callback
+        if (blocked) {
+            if (onComplete != null) {
+                onComplete.run();
+            }
+            return;
+        }
         if (impl != null && impl.isAvailable()) {
             impl.show(onComplete);
         } else {
@@ -121,6 +166,10 @@ public class InterstitialAd {
      * Should be called from game's update loop (e.g., InterlevelScene.update()).
      */
     public static void checkCallback() {
+        // If blocked, don't poll for callbacks
+        if (blocked) {
+            return;
+        }
         if (impl != null) {
             impl.checkCallback();
         }
