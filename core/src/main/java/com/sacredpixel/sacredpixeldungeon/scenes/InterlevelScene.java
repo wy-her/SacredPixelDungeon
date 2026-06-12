@@ -74,12 +74,16 @@ import java.util.ArrayList;
 
 public class InterlevelScene extends PixelScene {
 	
-	//slow fade on entering a new region
-	private static final float SLOW_FADE = 1f; //.2 in, 1.6 steady, .2 out, 2 seconds total
+	//slow fade on entering a new region or floor 26
+	//FADE_IN (0.9s) + FADE_OUT (0.9s) = 1.8s total
+	private static final float SLOW_FADE = 0.9f;
 	//norm fade when loading, falling, returning, or descending to a new floor
-	private static final float NORM_FADE = 0.67f; //.2 in, .47 steady, .2 out, 0.87 seconds total
+	//FADE_IN (0.7s) + FADE_OUT (0.7s) = 1.4s total
+	private static final float NORM_FADE = 0.7f;
 	//fast fade when ascending, or descending to a floor you've been on
-	private static final float FAST_FADE = 0.50f; //.2 in, .3 steady, .2 out, 0.7 seconds total
+	//FADE_IN (0.5s) + FADE_OUT (0.5s) = 1.0s total
+	//currently unused, reserved for potential future use
+	private static final float FAST_FADE = 0.5f;
 
 	//background fade duration (in/out) for story sequences
 	private static final float BG_FADE_DURATION = 0.5f;
@@ -188,10 +192,8 @@ public class InterlevelScene extends PixelScene {
 					} else {
 						isNewFloor = true;
 					}
-					if (isNewFloor && (loadingDepth == 6 || loadingDepth == 11
-							|| loadingDepth == 16 || loadingDepth == 21 || loadingDepth == 26)) {
-						fadeTime = SLOW_FADE;
-					}
+					//floors 6,11,16,21,26 skip FADE_IN (WndRegionComplete shown first)
+					//so SLOW_FADE is not applied to any region complete floors
 				}
 				break;
 			case FALL:
@@ -338,8 +340,10 @@ public class InterlevelScene extends PixelScene {
 			}
 		}
 
-		if (isStoryFloor && isNewFloor && mode == Mode.DESCEND && Dungeon.hero != null) {
-			//Skip fade-in for story floors (6,11,16,21) - WndRegionComplete shown first
+		//Skip fade-in for WndRegionComplete floors (6,11,16,21,26)
+		boolean isRegionCompleteFloor = isNewFloor && mode == Mode.DESCEND && Dungeon.hero != null
+				&& (loadingDepth == 6 || loadingDepth == 11 || loadingDepth == 16 || loadingDepth == 21 || loadingDepth == 26);
+		if (isRegionCompleteFloor) {
 			phase = Phase.STATIC;
 			if (background != null) background.alpha(0);
 			if (loadingText != null) loadingText.alpha(0);
@@ -703,7 +707,7 @@ public class InterlevelScene extends PixelScene {
 		int w = (int)(Camera.main.width - insets.left - insets.right);
 		int h = (int)(Camera.main.height - insets.top - insets.bottom);
 
-		storyMessage = PixelScene.renderTextBlock(Document.INTROS.pageBody(region), 6);
+		storyMessage = PixelScene.renderTextBlock(Document.INTROS.pageBody(region), 7);
 		storyMessage.maxWidth( PixelScene.landscape() ? 180 : 125);
 		storyMessage.setPos(insets.left+(w-storyMessage.width())/2f, insets.top+(h-storyMessage.height())/2f);
 		storyMessage.alpha(0);  // Start at 0, fade in during STATIC
@@ -792,9 +796,9 @@ public class InterlevelScene extends PixelScene {
 			return;
 		}
 
-		// Show WndRegionComplete on story floors: 6, 11, 16, 21 (first visit only)
+		// Show WndRegionComplete on region complete floors: 6, 11, 16, 21, 26 (first visit only)
 		// No gray overlay - just hide interlevel elements until WndRegionComplete closes
-		if (Dungeon.depth == 6 || Dungeon.depth == 11 || Dungeon.depth == 16 || Dungeon.depth == 21) {
+		if (Dungeon.depth == 6 || Dungeon.depth == 11 || Dungeon.depth == 16 || Dungeon.depth == 21 || Dungeon.depth == 26) {
 			if (Dungeon.hero != null) {
 				stageClearPending = true;
 				stageClearWindowCreated = false;
@@ -814,22 +818,23 @@ public class InterlevelScene extends PixelScene {
 		timeLeft = fadeTime;
 	}
 
-	// Called after WndRegionComplete closes (floors 6,11,16,21)
-	// Creates story elements and starts fade-in
+	// Called after WndRegionComplete closes (floors 6,11,16,21,26)
+	// Creates story elements and starts fade-in for story floors
+	// For non-story floors (26), keeps black background and transitions to GameScene
 	private void startPostRegionComplete() {
 		stageClearPending = false;
 
-		// Restore background visibility but start with alpha 0 for smooth fade-in
-		if (background != null) {
-			background.visible = true;
-			background.alpha(0);
-		}
-		if (loadingText != null) {
-			loadingText.visible = true;
-			loadingText.alpha(0);
-		}
-
 		if (isStoryFloor) {
+			// Restore background visibility but start with alpha 0 for smooth fade-in
+			if (background != null) {
+				background.visible = true;
+				background.alpha(0);
+			}
+			if (loadingText != null) {
+				loadingText.visible = true;
+				loadingText.alpha(0);
+			}
+
 			// Create story elements (same as floor 1 in create())
 			createStoryElements(storyRegion);
 
@@ -849,9 +854,10 @@ public class InterlevelScene extends PixelScene {
 			textFadingIn = false;  // Will be set true after bgFadingIn completes
 			phase = Phase.STATIC;
 		} else {
-			// Non-story floor - fade out to GameScene
+			// Non-story floor (26) - keep black background, use SLOW_FADE for dramatic effect
+			// Background stays hidden (black) during FADE_OUT
 			phase = Phase.FADE_OUT;
-			timeLeft = fadeTime;
+			timeLeft = SLOW_FADE;
 		}
 	}
 

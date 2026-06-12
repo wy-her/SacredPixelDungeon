@@ -1,4 +1,4 @@
-import { TossAds, setDeviceOrientation, setScreenAwakeMode, loadFullScreenAd, showFullScreenAd, graniteEvent, setIosSwipeGestureEnabled } from '@apps-in-toss/web-framework';
+import { TossAds, setDeviceOrientation, setScreenAwakeMode, loadFullScreenAd, showFullScreenAd, graniteEvent, setIosSwipeGestureEnabled, SafeAreaInsets } from '@apps-in-toss/web-framework';
 import { closeView } from '@apps-in-toss/web-bridge';
 import { initFirebase, loadCloudData, saveCloudData, type CloudSaveData } from './firebase';
 
@@ -31,6 +31,38 @@ import('@apps-in-toss/web-framework').then(sdk => {
 }).catch(e => {
     console.warn('SDK config not available:', e);
 });
+
+// SafeAreaInsets 적용 (네비게이션 바 높이 포함)
+function applySafeAreaInsets() {
+    const app = document.getElementById('app');
+    if (!app) return;
+
+    try {
+        const insets = SafeAreaInsets.get();
+        app.style.setProperty('--safe-area-top', `${insets.top}px`);
+        console.log('SafeAreaInsets applied:', insets);
+    } catch (e) {
+        console.warn('SafeAreaInsets not available:', e);
+    }
+}
+
+// 초기 적용
+applySafeAreaInsets();
+
+// SafeArea 변경 시 동적 업데이트 (화면 회전 등)
+try {
+    SafeAreaInsets.subscribe({
+        onEvent: (insets) => {
+            const app = document.getElementById('app');
+            if (app) {
+                app.style.setProperty('--safe-area-top', `${insets.top}px`);
+                console.log('SafeAreaInsets updated:', insets);
+            }
+        }
+    });
+} catch (e) {
+    console.warn('SafeAreaInsets.subscribe not available:', e);
+}
 
 // 앱인토스 플랫폼 마커는 index.html의 인라인 스크립트에서 설정됨
 // (iframe보다 먼저 실행되어야 하므로)

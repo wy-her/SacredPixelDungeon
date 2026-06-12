@@ -111,14 +111,21 @@ public class TestLevel extends Level {
 			}
 		}
 
-		int entrancePos = 16 * W + 16;
-		map[entrancePos] = Terrain.ENTRANCE;
-		transitions.add(new LevelTransition(this, entrancePos, LevelTransition.Type.REGULAR_ENTRANCE));
+		// No entrance (ascending stairs) - hero spawns at center
+		int spawnPos = 16 * W + 16;
+		map[spawnPos] = Terrain.EMPTY;
 
-		//Add descending stairs below spawn for ad flow testing
-		int exitPos = 18 * W + 16;
-		map[exitPos] = Terrain.EXIT;
-		transitions.add(new LevelTransition(this, exitPos, LevelTransition.Type.REGULAR_EXIT));
+		// Exit 1: goes to depth 20 (City Boss)
+		int exit1Pos = 18 * W + 14;
+		map[exit1Pos] = Terrain.EXIT;
+		transitions.add(new LevelTransition(this, exit1Pos, LevelTransition.Type.REGULAR_EXIT,
+				20, 0, LevelTransition.Type.REGULAR_ENTRANCE));
+
+		// Exit 2: goes to depth 25 (Halls Boss)
+		int exit2Pos = 18 * W + 18;
+		map[exit2Pos] = Terrain.EXIT;
+		transitions.add(new LevelTransition(this, exit2Pos, LevelTransition.Type.REGULAR_EXIT,
+				25, 0, LevelTransition.Type.REGULAR_ENTRANCE));
 
 		// Alchemy room (5x5) in top-left area
 		// Room boundaries: x=5-9, y=5-9
@@ -218,11 +225,12 @@ public class TestLevel extends Level {
 
 		Dungeon.gold = 10000;
 
-		// Mark all bosses up to DK as defeated (for depth 20 CityBossLevel)
+		// Mark all bosses as defeated (for depth 20 and 25 boss levels)
 		Statistics.bossScores[0] = 1000; // Goo
 		Statistics.bossScores[1] = 2000; // Tengu
 		Statistics.bossScores[2] = 3000; // DM-300
 		Statistics.bossScores[3] = 4000; // Dwarf King
+		Statistics.bossScores[4] = 5000; // Yog-Dzewa
 
 		// Rat King is NOT awoken (sleeping state for testing)
 		Statistics.ratKingAwoken = false;
@@ -276,13 +284,14 @@ public class TestLevel extends Level {
 		drop(Generator.random(Generator.Category.RING).identify(), 10 * W + 24).type = Heap.Type.FOR_SALE;
 		drop(Generator.random(Generator.Category.WAND).identify(), 10 * W + 26).type = Heap.Type.FOR_SALE;
 
-		// === Drop all items near hero spawn (entrance at 16,16) ===
-		int entrancePos = 16 * W + 16;
+		// === Drop all items near hero spawn (center at 16,16) ===
+		int spawnPos = 16 * W + 16;
+		int exit1Pos = 18 * W + 14;
+		int exit2Pos = 18 * W + 18;
 		ArrayList<Integer> dropPositions = new ArrayList<>();
 
-		// Generate positions in expanding rings around entrance
-		// Skip entrance itself and exit (at 18,16)
-		int exitPos = 18 * W + 16;
+		// Generate positions in expanding rings around spawn
+		// Skip spawn and exits
 		for (int radius = 1; radius <= 14; radius++) {
 			for (int dx = -radius; dx <= radius; dx++) {
 				for (int dy = -radius; dy <= radius; dy++) {
@@ -291,7 +300,7 @@ public class TestLevel extends Level {
 					int y = 16 + dy;
 					if (x >= 1 && x < W-1 && y >= 1 && y < H-1) {
 						int pos = y * W + x;
-						if (pos != entrancePos && pos != exitPos && map[pos] == Terrain.EMPTY) {
+						if (pos != spawnPos && pos != exit1Pos && pos != exit2Pos && map[pos] == Terrain.EMPTY) {
 							dropPositions.add(pos);
 						}
 					}
@@ -419,6 +428,12 @@ public class TestLevel extends Level {
 		if (dropIdx < dropPositions.size()) {
 			drop(new Amulet(), dropPositions.get(dropIdx++));
 		}
+	}
+
+	@Override
+	public int entrance() {
+		// Hero spawns at center (no actual entrance stairs)
+		return 16 * W + 16;
 	}
 
 	@Override

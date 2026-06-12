@@ -93,6 +93,11 @@ public class CellSelector extends ScrollArea {
 	@Override
 	protected void onClick( PointerEvent event ) {
 		if (Dungeon.hero != null && !Dungeon.hero.ready) {
+			// Allow canceling rest by clicking/tapping anywhere
+			if (Dungeon.hero.resting) {
+				Dungeon.hero.interrupt();
+				return;
+			}
 			// Allow canceling long-distance movement by clicking/tapping anywhere.
 			// This works for Move actions and also for compound actions
 			// (PickUp, OpenChest, Unlock, etc.) that involve walking to a destination.

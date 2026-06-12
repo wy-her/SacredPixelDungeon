@@ -4,6 +4,14 @@
         <title>Sacred Pixel Dungeon</title>
         <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+        <meta name="description" content="Sacred Pixel Dungeon - A roguelike dungeon crawler. Fight monsters, collect items, and escape with the Amulet of Yendor. Play directly in your browser!">
+        <meta name="keywords" content="Sacred Pixel Dungeon, roguelike, dungeon, pixel dungeon, game, HTML5, browser game">
+        <meta name="author" content="AI SOFT">
+        <meta property="og:title" content="Sacred Pixel Dungeon">
+        <meta property="og:description" content="A roguelike dungeon crawler. Play directly in your browser!">
+        <meta property="og:type" content="website">
+        <meta property="og:url" content="https://sacredpixel.net/">
+        <meta property="og:image" content="https://sacredpixel.net/og-image.png">
         <meta name="apple-mobile-web-app-capable" content="yes">
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
         <link rel="icon" href="assets/interfaces/sacred-logo.png" type="image/png">
@@ -29,15 +37,19 @@
                 border: none;
                 touch-action: manipulation;
             }
-            #loading {
-                display: none;
-            }
         </style>
     </head>
     <body oncontextmenu="return false">
-        <div id="loading">Loading...</div>
+        <noscript>
+            <div style="background:#1a1a2e;color:#eee;padding:40px;text-align:center;font-family:sans-serif;">
+                <h1>Sacred Pixel Dungeon</h1>
+                <p>A roguelike dungeon crawler</p>
+                <p>Fight monsters, collect items, and escape with the Amulet of Yendor in procedurally generated dungeons.</p>
+                <p style="margin-top:20px;color:#ffd700;">Please enable JavaScript to play this game.</p>
+            </div>
+        </noscript>
         <div id="rating-splash">
-            <img src="GRAC_Game_Grade_Text.png" alt="게임 등급 정보">
+            <img src="GRAC_Game_Grade_Text.png" alt="Game Rating Information">
         </div>
         <canvas id="canvas"></canvas>
 
@@ -95,12 +107,7 @@
                 console.warn('Suppressed audio error:', msg);
                 return true; // suppress
             }
-            var div = document.getElementById('loading');
-            if (div) {
-                div.style.display = 'block';
-                div.innerHTML += '<p style="color:red;font-size:11px;text-align:left;word-break:break-all;font-family:monospace;">'
-                    + msg + ' (line ' + line + ')' + '</p>';
-            }
+            // Log to console only - don't add to DOM (prevents Google indexing error messages)
             console.error('Error:', msg, url, line, col, error);
             return false;
         };
@@ -225,16 +232,6 @@
                     console.warn(f[0] + ' font load failed:', err);
                 });
             } catch(e) { /* ignore */ }
-        });
-
-        // Hide loading screen once game assets finish loading.
-        // Rating info is hidden separately when the game canvas starts rendering.
-        // Audio unlock is handled by document-level gesture listeners above.
-        window.addEventListener('load', function() {
-            var loadingDiv = document.getElementById('loading');
-            if (loadingDiv) {
-                loadingDiv.style.display = 'none';
-            }
         });
 
         // --- Auto-save system for HTML5 ---

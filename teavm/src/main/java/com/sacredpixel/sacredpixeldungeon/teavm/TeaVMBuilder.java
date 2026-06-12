@@ -79,6 +79,7 @@ public class TeaVMBuilder {
             copyFile(new File(srcDir, "styles.css"), new File(webappDir, "styles.css"));
             copyFile(new File(srcDir, "banner.png"), new File(webappDir, "banner.png"));
             copyFile(new File(srcDir, "GRAC_Game_Grade_Text.png"), new File(webappDir, "GRAC_Game_Grade_Text.png"));
+            copyFile(new File(srcDir, "og-image.png"), new File(webappDir, "og-image.png"));
 
             // Copy fonts directory
             File fontsDir = new File(srcDir, "fonts");

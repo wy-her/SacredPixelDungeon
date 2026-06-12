@@ -1487,6 +1487,21 @@ public class Hero extends Char {
 		if (hasTalent(Talent.PATIENT_STRIKE)){
 			Buff.affect(Dungeon.hero, Talent.PatientStrikeTracker.class).pos = Dungeon.hero.pos;
 		}
+
+		// Prevent full rest when HP regeneration is not possible
+		if (fullRest) {
+			boolean canRegenerate = Regeneration.regenOn() && HP < HT && !isStarving();
+			if (!canRegenerate) {
+				fullRest = false;
+				if (!Regeneration.regenOn()) {
+					GLog.w(Messages.get(this, "no_rest_regen"));
+				} else if (isStarving()) {
+					GLog.w(Messages.get(this, "no_rest_starving"));
+				}
+				// If HP >= HT, silently convert to single wait (no message needed)
+			}
+		}
+
 		if (!fullRest) {
 			if (sprite != null) {
 				sprite.showStatus(CharSprite.DEFAULT, Messages.get(this, "wait"));

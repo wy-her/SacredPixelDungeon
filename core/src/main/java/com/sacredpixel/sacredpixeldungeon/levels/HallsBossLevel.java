@@ -171,6 +171,11 @@ public class HallsBossLevel extends Level {
 
 		Painter.fill(this, ROOM_LEFT+3, ROOM_TOP+2, 3, 4, Terrain.EMPTY );
 
+		// If boss already defeated, show exit immediately
+		if (Statistics.bossScores[4] > 0) {
+			map[exitCell] = Terrain.EXIT;
+		}
+
 		LevelTransition exit = new LevelTransition(this, exitCell, LevelTransition.Type.REGULAR_EXIT);
 		exit.top--;
 		exit.left--;
@@ -245,7 +250,9 @@ public class HallsBossLevel extends Level {
 
 	@Override
 	public void occupyCell( Char ch ) {
-		if (map[entrance()] == Terrain.ENTRANCE && map[exit()] != Terrain.EXIT
+		// Don't seal if boss already defeated
+		if (Statistics.bossScores[4] == 0
+				&& map[entrance()] == Terrain.ENTRANCE && map[exit()] != Terrain.EXIT
 				&& ch == Dungeon.hero && Dungeon.level.distance(ch.pos, entrance()) >= 2) {
 			seal();
 		}

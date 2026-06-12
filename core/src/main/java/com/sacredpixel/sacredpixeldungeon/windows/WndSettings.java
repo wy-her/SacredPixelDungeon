@@ -26,6 +26,7 @@ package com.sacredpixel.sacredpixeldungeon.windows;
 
 import com.sacredpixel.sacredpixeldungeon.Assets;
 import com.sacredpixel.sacredpixeldungeon.Chrome;
+import com.sacredpixel.sacredpixeldungeon.Dungeon;
 import com.sacredpixel.sacredpixeldungeon.SPDSettings;
 import com.sacredpixel.sacredpixeldungeon.SacredPixelDungeon;
 import com.sacredpixel.sacredpixeldungeon.messages.Languages;
@@ -307,7 +308,9 @@ public class WndSettings extends WndTabbed {
 		//resets generators because there's no need to retain chars for languages not selected
 		//skip if a scene switch is already in progress to avoid double reset
 		//also skip if we're in SettingsScene - it will handle navigation itself
-		if (!Game.switchingScene() && !(Game.scene() instanceof SettingsScene)) {
+		//also skip if hero is dead to avoid re-triggering death sequence and guide popups
+		if (!Game.switchingScene() && !(Game.scene() instanceof SettingsScene)
+				&& !(Dungeon.hero != null && !Dungeon.hero.isAlive())) {
 			SacredPixelDungeon.seamlessResetScene(new Game.SceneChangeCallback() {
 				@Override
 				public void beforeCreate() {
