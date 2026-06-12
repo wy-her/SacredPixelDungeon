@@ -37,6 +37,9 @@ import org.teavm.jso.JSObject;
  */
 public class TeaVMInterstitialAd {
 
+    // Static callback reference to prevent garbage collection
+    private static AdCallback pendingCallback = null;
+
     /**
      * Check if interstitial ad API is available.
      * Returns true if the bridge function exists in parent window.
@@ -87,12 +90,42 @@ public class TeaVMInterstitialAd {
      * @param callback Called when the ad is dismissed or fails to show.
      */
     public static void show(AdCallback callback) {
-        showAsync(new JSAdCallback() {
-            @Override
-            public void onComplete() {
-                callback.onComplete();
-            }
-        });
+        // Store callback in static variable to prevent GC
+        pendingCallback = callback;
+        showAsyncWithPolling();
+    }
+
+    /**
+     * Called by JavaScript polling to check if callback should be invoked.
+     * This is called from the game's render loop via requestAnimationFrame.
+     */
+    public static void checkAndInvokeCallback() {
+        if (pendingCallback != null && isAdCompleteFlag()) {
+            AdCallback cb = pendingCallback;
+            pendingCallback = null;
+            clearAdCompleteFlag();
+            cb.onComplete();
+        }
+    }
+
+    @JSBody(script = "return window.__adCompleteFlag__ === true;")
+    private static native boolean isAdCompleteFlag();
+
+    @JSBody(script = "window.__adCompleteFlag__ = false;")
+    private static native void clearAdCompleteFlag();
+
+    /**
+     * Public method to check if ad is complete (for polling from TeaVMLauncher).
+     */
+    public static boolean isAdComplete() {
+        return isAdCompleteFlag();
+    }
+
+    /**
+     * Public method to clear complete flag (for polling from TeaVMLauncher).
+     */
+    public static void clearComplete() {
+        clearAdCompleteFlag();
     }
 
     /**
@@ -102,24 +135,12 @@ public class TeaVMInterstitialAd {
         void onComplete();
     }
 
-    /**
-     * Internal JS callback interface.
-     */
-    @JSFunctor
-    private interface JSAdCallback extends JSObject {
-        void onComplete();
-    }
-
-    @JSBody(params = {"callback"}, script =
+    @JSBody(script =
         "try {" +
-        "  var called = false;" +
+        "  window.__adCompleteFlag__ = false;" +
         "  var doComplete = function() {" +
-        "    if (called) return;" +
-        "    called = true;" +
-        "    console.log('TeaVMInterstitialAd: invoking Java callback');" +
-        "    try { callback.onComplete(); } catch(e) { console.error('TeaVMInterstitialAd callback error', e); }" +
-        "    window.__onInterstitialAdComplete__ = null;" +
-        "    window.removeEventListener('message', msgHandler);" +
+        "    console.log('TeaVMInterstitialAd: setting complete flag');" +
+        "    window.__adCompleteFlag__ = true;" +
         "  };" +
         "  window.__onInterstitialAdComplete__ = doComplete;" +
         "  var msgHandler = function(e) {" +
@@ -138,7 +159,7 @@ public class TeaVMInterstitialAd {
         "  }" +
         "} catch(e) {" +
         "  console.error('TeaVMInterstitialAd error', e);" +
-        "  try { callback.onComplete(); } catch(e2) {}" +
+        "  window.__adCompleteFlag__ = true;" +
         "}")
-    private static native void showAsync(JSAdCallback callback);
+    private static native void showAsyncWithPolling();
 }

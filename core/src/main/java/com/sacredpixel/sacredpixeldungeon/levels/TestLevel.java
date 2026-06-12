@@ -121,11 +121,11 @@ public class TestLevel extends Level {
 		transitions.add(new LevelTransition(this, exit1Pos, LevelTransition.Type.REGULAR_EXIT,
 				20, 0, LevelTransition.Type.REGULAR_ENTRANCE));
 
-		// Exit 2: goes to depth 25 (Halls Boss)
+		// Exit 2: goes to depth 5 (Sewers boss - Goo)
 		int exit2Pos = 18 * W + 18;
 		map[exit2Pos] = Terrain.EXIT;
 		transitions.add(new LevelTransition(this, exit2Pos, LevelTransition.Type.REGULAR_EXIT,
-				25, 0, LevelTransition.Type.REGULAR_ENTRANCE));
+				5, 0, LevelTransition.Type.REGULAR_ENTRANCE));
 
 		// Alchemy room (5x5) in top-left area
 		// Room boundaries: x=5-9, y=5-9
@@ -286,8 +286,8 @@ public class TestLevel extends Level {
 
 		// === Drop all items near hero spawn (center at 16,16) ===
 		int spawnPos = 16 * W + 16;
-		int exit1Pos = 18 * W + 14;
-		int exit2Pos = 18 * W + 18;
+		int exit1Pos = 18 * W + 14;  // → depth 20
+		int exit2Pos = 18 * W + 18;  // → depth 5
 		ArrayList<Integer> dropPositions = new ArrayList<>();
 
 		// Generate positions in expanding rings around spawn

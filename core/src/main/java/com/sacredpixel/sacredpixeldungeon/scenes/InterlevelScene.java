@@ -26,6 +26,7 @@ package com.sacredpixel.sacredpixeldungeon.scenes;
 
 import com.sacredpixel.sacredpixeldungeon.Assets;
 import com.sacredpixel.sacredpixeldungeon.Chrome;
+import com.sacredpixel.sacredpixeldungeon.InterstitialAd;
 import com.sacredpixel.sacredpixeldungeon.Dungeon;
 import com.sacredpixel.sacredpixeldungeon.GamesInProgress;
 import com.sacredpixel.sacredpixeldungeon.SacredPixelDungeon;
@@ -42,6 +43,7 @@ import com.sacredpixel.sacredpixeldungeon.journal.Document;
 import com.sacredpixel.sacredpixeldungeon.journal.Notes;
 import com.sacredpixel.sacredpixeldungeon.levels.Level;
 import com.sacredpixel.sacredpixeldungeon.levels.Terrain;
+import com.sacredpixel.sacredpixeldungeon.levels.TestLevel;
 import com.sacredpixel.sacredpixeldungeon.levels.features.Chasm;
 import com.sacredpixel.sacredpixeldungeon.levels.features.LevelTransition;
 import com.sacredpixel.sacredpixeldungeon.levels.rooms.special.SpecialRoom;
@@ -142,6 +144,7 @@ public class InterlevelScene extends PixelScene {
 	private boolean isStoryFloor = false;
 	private int storyRegion = 0;
 	private boolean exitAfterFadeIn = false;  // For non-story floors after region complete
+	private boolean interstitialAdShown = false;  // Prevents duplicate ad/story display
 	private boolean storyCreatedForFadeIn = false;  // Story elements created, waiting for fade-in
 
 	// For floor 1: show Dungeon intro first, then Sewers intro
@@ -409,6 +412,9 @@ public class InterlevelScene extends PixelScene {
 	@Override
 	public void update() {
 		super.update();
+
+		// Poll for interstitial ad completion callback
+		InterstitialAd.checkCallback();
 
 		//STAGE_CLEAR phase: create WndRegionComplete (no fade-in)
 		if (phase == Phase.STAGE_CLEAR && !stageClearWindowCreated) {
@@ -822,8 +828,35 @@ public class InterlevelScene extends PixelScene {
 	// Creates story elements and starts fade-in for story floors
 	// For non-story floors (26), keeps black background and transitions to GameScene
 	private void startPostRegionComplete() {
+		// Prevent duplicate calls (e.g., from ad callback race conditions)
+		if (interstitialAdShown) return;
+		interstitialAdShown = true;
+
 		stageClearPending = false;
 
+		// Show interstitial ad for floors 6, 11, 16, 21 (not 26)
+		// Ad is preloaded when boss is killed on floors 5, 10, 15, 20
+		int depth = Dungeon.depth;
+		if (depth == 6 || depth == 11 || depth == 16 || depth == 21) {
+			final InterlevelScene scene = this;
+			InterstitialAd.show(() -> {
+				// Ad completed (or skipped/timed out) - proceed to story
+				// Must run on render thread since callback comes from JavaScript
+				Game.runOnRenderThread(new com.watabou.utils.Callback() {
+					@Override
+					public void call() {
+						scene.proceedToStory();
+					}
+				});
+			});
+		} else {
+			// Floor 26 or other - no ad, proceed directly
+			proceedToStory();
+		}
+	}
+
+	// Called after interstitial ad completes (or immediately if no ad)
+	private void proceedToStory() {
 		if (isStoryFloor) {
 			// Restore background visibility but start with alpha 0 for smooth fade-in
 			if (background != null) {
@@ -875,8 +908,8 @@ public class InterlevelScene extends PixelScene {
 			GameLog.wipe();
 			ActionIndicator.clearAction();
 			Dungeon.hero.HP = Dungeon.hero.HT = 999;
-			Dungeon.depth = 19; //so exit stairs go to depth 20 (City Boss level)
-			Statistics.deepestFloor = 19;
+			Dungeon.depth = 1; // Test Level at depth 1
+			Statistics.deepestFloor = 19; // Keep high for exits to depth 20/25
 			Level level = new com.sacredpixel.sacredpixeldungeon.levels.TestLevel();
 			level.create();
 			Dungeon.switchLevel( level, -1 );
@@ -919,8 +952,22 @@ public class InterlevelScene extends PixelScene {
 			Dungeon.saveAll();
 
 			Level level;
+			int prevDepth = Dungeon.depth;
 			Dungeon.depth = curTransition.destDepth;
 			Dungeon.branch = curTransition.destBranch;
+
+			// Special case: Test Level → Floor 5 (Goo boss)
+			// Reset statistics so Goo fight is fresh (test ad preload → floor 6 → WndRegionComplete → ad → story)
+			// Only applies when coming from actual TestLevel
+			if (Dungeon.depth == 5 && Dungeon.level instanceof TestLevel) {
+				Statistics.deepestFloor = 4;  // So floor 5 is "new"
+				// No bosses killed yet
+				Statistics.bossScores[0] = 0;     // Goo not killed
+				Statistics.bossScores[1] = 0;     // Tengu not killed
+				Statistics.bossScores[2] = 0;     // DM-300 not killed
+				Statistics.bossScores[3] = 0;     // Dwarf King not killed
+				Statistics.bossScores[4] = 0;     // Yog-Dzewa not killed
+			}
 
 			if (Dungeon.levelHasBeenGenerated(Dungeon.depth, Dungeon.branch)) {
 				level = Dungeon.loadLevel( GamesInProgress.curSlot );

@@ -25,6 +25,7 @@
 package com.sacredpixel.sacredpixeldungeon.scenes;
 
 import com.sacredpixel.sacredpixeldungeon.Assets;
+import com.sacredpixel.sacredpixeldungeon.InterstitialAd;
 import com.watabou.utils.GameSettings;
 import com.sacredpixel.sacredpixeldungeon.Badges;
 import com.sacredpixel.sacredpixeldungeon.Challenges;
@@ -1634,6 +1635,17 @@ public class GameScene extends PixelScene {
 			scene.showBanner( bossSlain );
 
 			Sample.INSTANCE.play( Assets.Sounds.BOSS );
+
+			// Preload interstitial ad for region complete floors (5, 10, 15, 20)
+			// Floor 25 (final boss) does not show ads
+			switch (Dungeon.depth) {
+				case 5:   // Goo (Sewers boss)
+				case 10:  // Tengu (Prison boss)
+				case 15:  // DM-300 (Caves boss)
+				case 20:  // Dwarf King (City boss)
+					InterstitialAd.preload();
+					break;
+			}
 		}
 	}
 	

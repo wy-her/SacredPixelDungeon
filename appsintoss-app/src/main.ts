@@ -410,11 +410,12 @@ function notifyAdComplete() {
         }
     };
 
-    // 타임아웃 설정 (5초 후 자동 진행 - 프리로드 시 보통 즉시 표시됨)
+    // 타임아웃 설정 (3초 후 자동 진행 - 프리로드 시 보통 즉시 표시됨)
+    // 유저 경험 우선: 3초 내 로드 안 되면 광고 스킵하고 게임 진행
     const timeout = setTimeout(() => {
-        console.warn('Interstitial ad timeout - continuing');
+        console.warn('Interstitial ad timeout (3s) - continuing without ad');
         complete();
-    }, 5000);
+    }, 3000);
 
     const clearAndComplete = () => {
         clearTimeout(timeout);

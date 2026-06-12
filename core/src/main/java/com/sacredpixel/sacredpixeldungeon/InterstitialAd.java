@@ -63,6 +63,15 @@ public class InterstitialAd {
         default boolean isPreloaded() {
             return false;
         }
+
+        /**
+         * Poll for async ad completion callback.
+         * Should be called from game's update loop.
+         * This is needed because JavaScript-to-Java async callbacks may not work reliably.
+         */
+        default void checkCallback() {
+            // Default implementation does nothing
+        }
     }
 
     /**
@@ -105,5 +114,15 @@ public class InterstitialAd {
      */
     public static boolean isPreloaded() {
         return impl != null && impl.isPreloaded();
+    }
+
+    /**
+     * Poll for async ad completion callback.
+     * Should be called from game's update loop (e.g., InterlevelScene.update()).
+     */
+    public static void checkCallback() {
+        if (impl != null) {
+            impl.checkCallback();
+        }
     }
 }

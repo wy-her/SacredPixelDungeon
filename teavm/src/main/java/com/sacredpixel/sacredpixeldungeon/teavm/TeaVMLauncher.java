@@ -140,16 +140,19 @@ public class TeaVMLauncher {
                 // Set up Appsintoss interstitial ad implementation
                 // 초기화 시점 체크 제거 - 항상 impl 설정하고 show() 내에서 동적 체크
                 InterstitialAd.impl = new InterstitialAd.InterstitialAdImpl() {
+                    private Runnable pendingOnComplete = null;
+
                     @Override
                     public void show(Runnable onComplete) {
                         // 동적으로 isAvailable() 체크 (초기화 타이밍 이슈 회피)
                         if (TeaVMInterstitialAd.isAvailable()) {
+                            // Store callback for polling-based invocation
+                            pendingOnComplete = onComplete;
                             TeaVMInterstitialAd.show(new TeaVMInterstitialAd.AdCallback() {
                                 @Override
                                 public void onComplete() {
-                                    if (onComplete != null) {
-                                        onComplete.run();
-                                    }
+                                    // This callback might not be invoked reliably from JS
+                                    // checkCallback() polling handles it instead
                                 }
                             });
                         } else {
@@ -176,6 +179,19 @@ public class TeaVMLauncher {
                     @Override
                     public boolean isPreloaded() {
                         return TeaVMInterstitialAd.isPreloaded();
+                    }
+
+                    @Override
+                    public void checkCallback() {
+                        // Poll for ad completion flag and invoke our callback directly
+                        // DO NOT call TeaVMInterstitialAd.checkAndInvokeCallback() - it clears the flag
+                        // before we can check it, causing our callback to never execute
+                        if (pendingOnComplete != null && TeaVMInterstitialAd.isAdComplete()) {
+                            Runnable cb = pendingOnComplete;
+                            pendingOnComplete = null;
+                            TeaVMInterstitialAd.clearComplete();
+                            cb.run();
+                        }
                     }
                 };
                 log("TeaVMLauncher: Appsintoss interstitial ad configured");
