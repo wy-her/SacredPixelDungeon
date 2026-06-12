@@ -37,6 +37,7 @@ import com.sacredpixel.sacredpixeldungeon.messages.Messages;
 import com.sacredpixel.sacredpixeldungeon.scenes.GameScene;
 import com.sacredpixel.sacredpixeldungeon.scenes.PixelScene;
 import com.sacredpixel.sacredpixeldungeon.sprites.CharSprite;
+import com.sacredpixel.sacredpixeldungeon.tutorial.TutorialManager;
 import com.sacredpixel.sacredpixeldungeon.windows.WndBag;
 import com.sacredpixel.sacredpixeldungeon.windows.WndKeyBindings;
 import com.watabou.input.GameAction;
@@ -87,6 +88,10 @@ public class QuickSlotButton extends Button {
 			@Override
 			protected void onClick() {
 				if (!Dungeon.hero.isAlive() || !Dungeon.hero.ready){
+					return;
+				}
+				// Tutorial restriction: block quickslot usage during restricted states
+				if (TutorialManager.isMovementRestricted()) {
 					return;
 				}
 				//if cell selector is targeting, confirm cursor position (quickslot re-press)

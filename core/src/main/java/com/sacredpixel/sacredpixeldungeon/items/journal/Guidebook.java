@@ -33,6 +33,7 @@ import com.sacredpixel.sacredpixeldungeon.journal.Document;
 import com.sacredpixel.sacredpixeldungeon.messages.Messages;
 import com.sacredpixel.sacredpixeldungeon.scenes.GameScene;
 import com.sacredpixel.sacredpixeldungeon.sprites.ItemSpriteSheet;
+import com.sacredpixel.sacredpixeldungeon.tutorial.TutorialManager;
 import com.sacredpixel.sacredpixeldungeon.ui.GameLog;
 import com.sacredpixel.sacredpixeldungeon.utils.GLog;
 import com.watabou.input.ControllerHandler;
@@ -59,10 +60,16 @@ public class Guidebook extends Item {
 		//we do this here so the pickup message appears before the tutorial text
 		GameLog.wipe();
 		GLog.i( Messages.capitalize(Messages.get(Hero.class, "you_now_have", name())) );
-		if (SPDSettings.interfaceSize() == 0){
-			GLog.p(Messages.get(GameScene.class, "tutorial_guidebook_mobile"));
+
+		// Tutorial level: trigger tutorial action instead of regular message
+		if (TutorialManager.isTutorialLevel()) {
+			TutorialManager.onAction(TutorialManager.TutorialAction.GUIDEBOOK_PICKED_UP);
 		} else {
-			GLog.p(Messages.get(GameScene.class, "tutorial_guidebook_desktop", KeyBindings.getKeyName(KeyBindings.getFirstKeyForAction(SPDAction.JOURNAL, ControllerHandler.isControllerConnected()))));
+			if (SPDSettings.interfaceSize() == 0){
+				GLog.p(Messages.get(GameScene.class, "tutorial_guidebook_mobile"));
+			} else {
+				GLog.p(Messages.get(GameScene.class, "tutorial_guidebook_desktop", KeyBindings.getKeyName(KeyBindings.getFirstKeyForAction(SPDAction.JOURNAL, ControllerHandler.isControllerConnected()))));
+			}
 		}
 		GameScene.flashForDocument(Document.ADVENTURERS_GUIDE, Document.GUIDE_INTRO);
 		Sample.INSTANCE.play( Assets.Sounds.ITEM );

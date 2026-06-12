@@ -33,6 +33,7 @@ import com.sacredpixel.sacredpixeldungeon.actors.hero.HeroAction;
 import com.sacredpixel.sacredpixeldungeon.actors.mobs.Mob;
 import com.sacredpixel.sacredpixeldungeon.items.Heap;
 import com.sacredpixel.sacredpixeldungeon.tiles.DungeonTilemap;
+import com.sacredpixel.sacredpixeldungeon.tutorial.TutorialManager;
 import com.sacredpixel.sacredpixeldungeon.ui.Icons;
 import com.sacredpixel.sacredpixeldungeon.ui.QuickSlotButton;
 import com.watabou.input.ControllerHandler;
@@ -194,6 +195,23 @@ public class CellSelector extends ScrollArea {
 			GameScene.cancel();
 			return;
 		}
+
+		// Tutorial restriction: block cell selection during specific states
+		if (TutorialManager.isMovementRestricted() && cell != -1) {
+			// During SNAKE_AT_DOOR, only allow clicking on enemy mobs
+			if (TutorialManager.isAttackAllowed()) {
+				Char ch = Actor.findChar(cell);
+				if (ch == null || ch.alignment != Char.Alignment.ENEMY) {
+					GameScene.cancel();
+					return;
+				}
+			} else {
+				// During WAIT_FOR_SNAKE, block all cell selection
+				GameScene.cancel();
+				return;
+			}
+		}
+
 		if (enabled && Dungeon.hero.ready && !GameScene.interfaceBlockingHero()
 				&& listener != null && cell != -1) {
 
@@ -507,6 +525,7 @@ public class CellSelector extends ScrollArea {
 				if (Dungeon.hero != null && !Dungeon.hero.ready) return true; // Block input when busy
 				if (Actor.anyEnemyAnimating()) return true; // Block input during enemy attack animations
 				if (GameScene.interfaceBlockingHero()) return true; // Block input when window is open
+				// Tutorial restriction is checked in moveFromActions, which allows attacks on enemies
 
 				Dungeon.hero.resting = false;
 				lastCellMoved = -1;
@@ -614,6 +633,19 @@ public class CellSelector extends ScrollArea {
 		//clamp to adjacent values (-1 to +1)
 		cell += GameMath.gate(-1, direction.x, +1);
 		cell += GameMath.gate(-1, direction.y, +1) * Dungeon.level.width();
+
+		// Block during tutorial restriction, but allow attacking enemies
+		if (TutorialManager.isMovementRestricted()) {
+			if (TutorialManager.isAttackAllowed()) {
+				Char ch = Actor.findChar(cell);
+				if (ch == null || ch.alignment != Char.Alignment.ENEMY) {
+					return false; // Block non-attack movement
+				}
+				// Allow attack on enemy
+			} else {
+				return false;
+			}
+		}
 
 		if (cell != Dungeon.hero.pos && cell != lastCellMoved){
 			lastCellMoved = cell;

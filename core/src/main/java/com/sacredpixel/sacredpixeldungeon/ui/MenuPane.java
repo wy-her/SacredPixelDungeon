@@ -35,6 +35,7 @@ import com.sacredpixel.sacredpixeldungeon.levels.Level;
 import com.sacredpixel.sacredpixeldungeon.messages.Messages;
 import com.sacredpixel.sacredpixeldungeon.scenes.GameScene;
 import com.sacredpixel.sacredpixeldungeon.scenes.PixelScene;
+import com.sacredpixel.sacredpixeldungeon.tutorial.TutorialManager;
 import com.sacredpixel.sacredpixeldungeon.windows.WndChallenges;
 import com.sacredpixel.sacredpixeldungeon.windows.WndGame;
 import com.sacredpixel.sacredpixeldungeon.windows.WndJournal;
@@ -341,17 +342,22 @@ public class MenuPane extends Component {
 						WndJournal.last_index = 3;
 						WndJournal.CatalogTab.currentItemIdx = 3;
 					}
-					GameScene.show( new WndStory( flashingDoc.pageSprite(flashingPage),
-							flashingDoc.pageTitle(flashingPage),
-							flashingDoc.pageBody(flashingPage) ){
-						@Override
-						public void hide() {
-							super.hide();
-							if (SPDSettings.intro()){
-								GameScene.endIntro();
+					// Tutorial level: just open journal without showing WndStory again
+					if (TutorialManager.isTutorialLevel()) {
+						GameScene.show( new WndJournal() );
+					} else {
+						GameScene.show( new WndStory( flashingDoc.pageSprite(flashingPage),
+								flashingDoc.pageTitle(flashingPage),
+								flashingDoc.pageBody(flashingPage) ){
+							@Override
+							public void hide() {
+								super.hide();
+								if (SPDSettings.intro()){
+									GameScene.endIntro();
+								}
 							}
-						}
-					});
+						});
+					}
 					flashingDoc.readPage(flashingPage);
 				} else {
 					GameScene.show( new WndJournal() );

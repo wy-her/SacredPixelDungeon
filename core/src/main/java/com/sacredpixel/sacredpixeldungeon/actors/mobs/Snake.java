@@ -31,6 +31,7 @@ import com.sacredpixel.sacredpixeldungeon.items.Generator;
 import com.sacredpixel.sacredpixeldungeon.journal.Document;
 import com.sacredpixel.sacredpixeldungeon.scenes.GameScene;
 import com.sacredpixel.sacredpixeldungeon.sprites.SnakeSprite;
+import com.sacredpixel.sacredpixeldungeon.tutorial.TutorialManager;
 import com.watabou.utils.Random;
 
 public class Snake extends Mob {
@@ -56,6 +57,32 @@ public class Snake extends Mob {
 	@Override
 	public int attackSkill( Char target ) {
 		return 10;
+	}
+
+	@Override
+	public int defenseSkill( Char enemy ) {
+		// In tutorial level, only surprise attacks can hit the snake
+		if (TutorialManager.isTutorialLevel()) {
+			// If snake can't see the hero (fieldOfView is null or hero not in FOV),
+			// allow the attack to hit (return 0 defense)
+			if (fieldOfView == null || !fieldOfView[enemy.pos]) {
+				return 0; // Can be hit - surprise attack!
+			}
+			return INFINITE_EVASION; // Snake sees hero - cannot be hit
+		}
+		return super.defenseSkill(enemy);
+	}
+
+	@Override
+	public void damage( int dmg, Object src ) {
+		// In tutorial level, if snake can't see the hero, it's a surprise attack - instant kill
+		if (TutorialManager.isTutorialLevel() && Dungeon.hero != null) {
+			// Check if this snake can see the hero
+			if (fieldOfView == null || !fieldOfView[Dungeon.hero.pos]) {
+				dmg = HP; // Snake couldn't see hero - surprise attack!
+			}
+		}
+		super.damage(dmg, src);
 	}
 
 	private static int dodges = 0;

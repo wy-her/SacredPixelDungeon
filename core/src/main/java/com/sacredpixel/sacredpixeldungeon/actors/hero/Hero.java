@@ -32,6 +32,7 @@ import com.sacredpixel.sacredpixeldungeon.GamesInProgress;
 import com.sacredpixel.sacredpixeldungeon.SPDSettings;
 import com.sacredpixel.sacredpixeldungeon.SacredPixelDungeon;
 import com.sacredpixel.sacredpixeldungeon.Statistics;
+import com.sacredpixel.sacredpixeldungeon.tutorial.TutorialManager;
 import com.sacredpixel.sacredpixeldungeon.actors.Actor;
 import com.sacredpixel.sacredpixeldungeon.actors.Char;
 import com.sacredpixel.sacredpixeldungeon.actors.blobs.Blob;
@@ -1481,6 +1482,12 @@ public class Hero extends Char {
 	
 	public void rest( boolean fullRest ) {
 		spendAndNextConstant( TIME_TO_REST );
+
+		// Tutorial: trigger HERO_WAITED action
+		if (TutorialManager.isTutorialLevel()) {
+			TutorialManager.onAction(TutorialManager.TutorialAction.HERO_WAITED);
+		}
+
 		if (hasTalent(Talent.HOLD_FAST)){
 			Buff.affect(this, HoldFast.class).pos = pos;
 		}
@@ -2326,7 +2333,10 @@ public class Hero extends Char {
 		boolean wasHighGrass = Dungeon.level.map[step] == Terrain.HIGH_GRASS;
 
 		super.move( step, travelling);
-		
+
+		// Notify tutorial manager of hero movement
+		TutorialManager.onHeroMove();
+
 		if (!flying && travelling) {
 			if (Dungeon.level.water[pos]) {
 				Sample.INSTANCE.play( Assets.Sounds.WATER, 1, Random.Float( 0.8f, 1.25f ) );
@@ -2578,6 +2588,11 @@ public class Hero extends Char {
 
 						//don't want to let the player search though hidden doors in tutorial
 						if (SPDSettings.intro()){
+							chance = 0;
+						}
+
+						// In tutorial level, only intentional searches can find hidden doors
+						if (TutorialManager.isTutorialLevel() && !intentional){
 							chance = 0;
 						}
 						

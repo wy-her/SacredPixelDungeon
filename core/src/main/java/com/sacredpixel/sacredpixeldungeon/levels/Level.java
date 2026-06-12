@@ -100,6 +100,8 @@ import com.sacredpixel.sacredpixeldungeon.messages.Messages;
 import com.sacredpixel.sacredpixeldungeon.plants.Plant;
 import com.sacredpixel.sacredpixeldungeon.plants.Swiftthistle;
 import com.sacredpixel.sacredpixeldungeon.scenes.GameScene;
+import com.sacredpixel.sacredpixeldungeon.tutorial.TutorialManager;
+import com.sacredpixel.sacredpixeldungeon.tutorial.TutorialState;
 import com.sacredpixel.sacredpixeldungeon.scenes.InterlevelScene;
 import com.sacredpixel.sacredpixeldungeon.sprites.ItemSprite;
 import com.sacredpixel.sacredpixeldungeon.tiles.CustomTilemap;
@@ -1093,11 +1095,19 @@ public abstract class Level implements Bundlable {
 	}
 
 	public void discover( int cell ) {
+		int oldTerrain = map[cell];
 		set( cell, Terrain.discover( map[cell] ) );
 		Trap trap = traps.get( cell );
 		if (trap != null)
 			trap.reveal();
 		GameScene.updateMap( cell );
+
+		// Trigger tutorial progression when a hidden door is discovered
+		if (oldTerrain == Terrain.SECRET_DOOR
+				&& TutorialManager.isTutorialLevel()
+				&& TutorialManager.getState() == TutorialState.SEARCH_HINT) {
+			TutorialManager.onAction(TutorialManager.TutorialAction.HIDDEN_DOOR_FOUND);
+		}
 	}
 
 	public boolean setCellToWater( boolean includeTraps, int cell ){

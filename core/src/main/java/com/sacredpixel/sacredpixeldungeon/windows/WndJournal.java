@@ -60,6 +60,8 @@ import com.sacredpixel.sacredpixeldungeon.messages.Messages;
 import com.sacredpixel.sacredpixeldungeon.plants.Plant;
 import com.sacredpixel.sacredpixeldungeon.scenes.GameScene;
 import com.sacredpixel.sacredpixeldungeon.scenes.PixelScene;
+import com.sacredpixel.sacredpixeldungeon.tutorial.TutorialManager;
+import com.sacredpixel.sacredpixeldungeon.tutorial.TutorialState;
 import com.sacredpixel.sacredpixeldungeon.sprites.CharSprite;
 import com.sacredpixel.sacredpixeldungeon.sprites.ItemSprite;
 import com.sacredpixel.sacredpixeldungeon.sprites.ItemSpriteSheet;
@@ -298,6 +300,15 @@ public class WndJournal extends WndTabbed {
 
 		// Build initial focus list based on active tab
 		rebuildFocusableButtons();
+	}
+
+	@Override
+	public void hide() {
+		super.hide();
+		// Trigger tutorial progression when journal is closed
+		if (TutorialManager.isTutorialLevel() && TutorialManager.getState() == TutorialState.JOURNAL_HINT) {
+			TutorialManager.onAction(TutorialManager.TutorialAction.JOURNAL_CLOSED);
+		}
 	}
 
 	private void rebuildFocusableButtons() {

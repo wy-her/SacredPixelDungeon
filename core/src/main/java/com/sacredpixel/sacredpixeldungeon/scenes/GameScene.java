@@ -94,6 +94,8 @@ import com.sacredpixel.sacredpixeldungeon.tiles.GridTileMap;
 import com.sacredpixel.sacredpixeldungeon.tiles.RaisedTerrainTilemap;
 import com.sacredpixel.sacredpixeldungeon.tiles.TerrainFeaturesTilemap;
 import com.sacredpixel.sacredpixeldungeon.tiles.WallBlockingTilemap;
+import com.sacredpixel.sacredpixeldungeon.tutorial.TutorialManager;
+import com.sacredpixel.sacredpixeldungeon.tutorial.TutorialState;
 import com.sacredpixel.sacredpixeldungeon.ui.ActionIndicator;
 import com.sacredpixel.sacredpixeldungeon.ui.AttackIndicator;
 import com.sacredpixel.sacredpixeldungeon.ui.Banner;
@@ -1275,10 +1277,30 @@ public class GameScene extends PixelScene {
 						if (SPDSettings.intro()){
 							GameScene.endIntro();
 						}
+						// Trigger tutorial progression when intro story is closed
+						if (TutorialManager.isTutorialLevel() && TutorialManager.getState() == TutorialState.INTRO_SHOWN) {
+							TutorialManager.onAction(TutorialManager.TutorialAction.STORY_WINDOW_CLOSED);
+						}
+						// Trigger tutorial progression when search guide is closed
+						if (TutorialManager.isTutorialLevel() && TutorialManager.getState() == TutorialState.SEARCH_GUIDE_SHOWN) {
+							TutorialManager.onAction(TutorialManager.TutorialAction.SEARCH_GUIDE_CLOSED);
+						}
 					}
 				});
 				doc.readPage(page);
 			}
+		}
+	}
+
+	public static void flashJournalButton( Document doc, String page ){
+		if (scene != null && scene.menu != null) {
+			scene.menu.flashForPage(doc, page);
+		}
+	}
+
+	public static void stopFlashJournalButton(){
+		if (scene != null && scene.menu != null) {
+			scene.menu.flashForPage(null, null);
 		}
 	}
 

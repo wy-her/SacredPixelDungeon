@@ -43,6 +43,7 @@ import com.sacredpixel.sacredpixeldungeon.scenes.PixelScene;
 import com.sacredpixel.sacredpixeldungeon.sprites.ItemSprite;
 import com.sacredpixel.sacredpixeldungeon.sprites.ItemSpriteSheet;
 import com.sacredpixel.sacredpixeldungeon.tiles.DungeonTerrainTilemap;
+import com.sacredpixel.sacredpixeldungeon.tutorial.TutorialManager;
 import com.sacredpixel.sacredpixeldungeon.windows.WndBag;
 import com.sacredpixel.sacredpixeldungeon.windows.WndKeyBindings;
 import com.sacredpixel.sacredpixeldungeon.windows.WndMessage;
@@ -76,6 +77,14 @@ public class Toolbar extends Component {
 	public boolean examining = false;
 
 	private static Toolbar instance;
+
+	// Tutorial flashing for search button
+	public static boolean searchFlashing = false;
+	private static float searchFlashTime = 0;
+
+	// Tutorial flashing for wait button
+	public static boolean waitFlashing = false;
+	private static float waitFlashTime = 0;
 
 	public enum Mode {
 		SPLIT,
@@ -201,11 +210,15 @@ public class Toolbar extends Component {
 			@Override
 			protected void onClick() {
 				if (Dungeon.hero != null && Dungeon.hero.ready && !Actor.anyEnemyAnimating() && !GameScene.cancel()) {
+					// Tutorial restriction: block wait during SNAKE_AT_DOOR state
+					if (!TutorialManager.isWaitAllowed()) {
+						return;
+					}
 					examining = false;
 					Dungeon.hero.rest(false);
 				}
 			}
-			
+
 			@Override
 			public GameAction keyAction() {
 				return SPDAction.WAIT;
@@ -223,6 +236,10 @@ public class Toolbar extends Component {
 
 			protected boolean onLongClick() {
 				if (Dungeon.hero != null && Dungeon.hero.ready && !Actor.anyEnemyAnimating() && !GameScene.cancel()) {
+					// Tutorial restriction: block wait during SNAKE_AT_DOOR state
+					if (!TutorialManager.isWaitAllowed()) {
+						return true;
+					}
 					examining = false;
 					Dungeon.hero.rest(true);
 				}
@@ -236,6 +253,10 @@ public class Toolbar extends Component {
 			@Override
 			protected void onClick() {
 				if (Dungeon.hero != null && Dungeon.hero.ready && !Actor.anyEnemyAnimating() && !GameScene.cancel()) {
+					// Tutorial restriction: block rest during SNAKE_AT_DOOR state
+					if (!TutorialManager.isWaitAllowed()) {
+						return;
+					}
 					examining = false;
 					Dungeon.hero.rest(true);
 				}
@@ -253,6 +274,14 @@ public class Toolbar extends Component {
 			@Override
 			protected void onClick() {
 				if (Dungeon.hero != null && Dungeon.hero.ready && !Actor.anyEnemyAnimating() && !GameScene.cancel()) {
+					// Tutorial restriction: during wait-only states, only allow wait
+					if (TutorialManager.isMovementRestricted()) {
+						if (TutorialManager.isWaitAllowed()) {
+							examining = false;
+							Dungeon.hero.rest(false);
+						}
+						return;
+					}
 					Dungeon.hero.waitOrPickup = true;
 					//if hero is standing on a level transition, activate it
 					if (Dungeon.level.getTransition(Dungeon.hero.pos) != null
@@ -278,6 +307,10 @@ public class Toolbar extends Component {
 
 			protected boolean onLongClick() {
 				if (Dungeon.hero != null && Dungeon.hero.ready && !Actor.anyEnemyAnimating() && !GameScene.cancel()) {
+					// Tutorial restriction: block rest during SNAKE_AT_DOOR state
+					if (!TutorialManager.isWaitAllowed()) {
+						return true;
+					}
 					examining = false;
 					Dungeon.hero.rest(true);
 				}
@@ -295,6 +328,10 @@ public class Toolbar extends Component {
 			@Override
 			protected void onClick() {
 				if (Dungeon.hero != null && Dungeon.hero.ready) {
+					// Tutorial restriction: block search during restricted states
+					if (TutorialManager.isMovementRestricted()) {
+						return;
+					}
 					if (!examining && !GameScene.cancel()) {
 						GameScene.selectCell(informer);
 						examining = true;
@@ -305,7 +342,7 @@ public class Toolbar extends Component {
 					}
 				}
 			}
-			
+
 			@Override
 			public GameAction keyAction() {
 				return SPDAction.EXAMINE;
@@ -315,9 +352,13 @@ public class Toolbar extends Component {
 			protected String hoverText() {
 				return Messages.titleCase(Messages.get(WndKeyBindings.class, "examine"));
 			}
-			
+
 			@Override
 			protected boolean onLongClick() {
+				// Tutorial restriction: block search during restricted states
+				if (TutorialManager.isMovementRestricted()) {
+					return true;
+				}
 				Dungeon.hero.search(true);
 				return true;
 			}
@@ -332,6 +373,10 @@ public class Toolbar extends Component {
 			@Override
 			protected void onClick() {
 				if (Dungeon.hero != null && (Dungeon.hero.ready || !Dungeon.hero.isAlive())) {
+					// Tutorial restriction: block inventory during restricted states
+					if (TutorialManager.isMovementRestricted()) {
+						return;
+					}
 					if (SPDSettings.interfaceSize() == 2) {
 						GameScene.toggleInvPane();
 					} else {
@@ -341,7 +386,7 @@ public class Toolbar extends Component {
 					}
 				}
 			}
-			
+
 			@Override
 			public GameAction keyAction() {
 				return SPDAction.INVENTORY;
@@ -356,9 +401,13 @@ public class Toolbar extends Component {
 			protected String hoverText() {
 				return Messages.titleCase(Messages.get(WndKeyBindings.class, "inventory"));
 			}
-			
+
 			@Override
 			protected boolean onLongClick() {
+				// Tutorial restriction: block inventory during restricted states
+				if (TutorialManager.isMovementRestricted()) {
+					return true;
+				}
 				GameScene.show(new WndQuickBag(null));
 				return true;
 			}
@@ -664,19 +713,39 @@ public class Toolbar extends Component {
 	@Override
 	public void update() {
 		super.update();
-		
+
 		if (lastEnabled != (Dungeon.hero.ready && Dungeon.hero.isAlive())) {
 			lastEnabled = (Dungeon.hero.ready && Dungeon.hero.isAlive());
-			
+
 			for (Gizmo tool : members.toArray(new Gizmo[0])) {
 				if (tool instanceof Tool) {
 					((Tool)tool).enable( lastEnabled );
 				}
 			}
 		}
-		
+
 		if (!Dungeon.hero.isAlive()) {
 			btnInventory.enable(true);
+		}
+
+		// Tutorial search button flashing
+		if (searchFlashing && btnSearch != null && btnSearch.icon != null) {
+			searchFlashTime += Game.elapsed;
+			float alpha = (float) Math.abs(Math.cos(searchFlashTime * StatusPane.FLASH_RATE));
+			btnSearch.icon.brightness(1f + alpha * 0.5f);
+		} else if (btnSearch != null && btnSearch.icon != null) {
+			btnSearch.icon.resetColor();
+			searchFlashTime = 0;
+		}
+
+		// Tutorial wait button flashing
+		if (waitFlashing && btnWait != null && btnWait.icon != null) {
+			waitFlashTime += Game.elapsed;
+			float alpha = (float) Math.abs(Math.cos(waitFlashTime * StatusPane.FLASH_RATE));
+			btnWait.icon.brightness(1f + alpha * 0.5f);
+		} else if (btnWait != null && btnWait.icon != null) {
+			btnWait.icon.resetColor();
+			waitFlashTime = 0;
 		}
 	}
 
@@ -716,11 +785,11 @@ public class Toolbar extends Component {
 	};
 	
 	private static class Tool extends Button {
-		
+
 		private static final int BGCOLOR = 0x7B8073;
-		
+
 		private Image base;
-		private Image icon;
+		protected Image icon; // changed to protected for tutorial flashing access
 		
 		public Tool( int x, int y, int width, int height ) {
 			super();

@@ -45,6 +45,8 @@ import com.sacredpixel.sacredpixeldungeon.ui.StatusPane;
 import com.sacredpixel.sacredpixeldungeon.ui.TalentButton;
 import com.sacredpixel.sacredpixeldungeon.ui.TalentsPane;
 import com.sacredpixel.sacredpixeldungeon.ui.Window;
+import com.sacredpixel.sacredpixeldungeon.tutorial.TutorialManager;
+import com.sacredpixel.sacredpixeldungeon.tutorial.TutorialState;
 import com.sacredpixel.sacredpixeldungeon.utils.DungeonSeed;
 import com.watabou.input.KeyBindings;
 import com.watabou.input.KeyEvent;
@@ -161,6 +163,15 @@ public class WndHero extends WndTabbed {
 		talents.layout();
 
 		select( lastIdx );
+	}
+
+	@Override
+	public void hide() {
+		super.hide();
+		// Trigger tutorial progression when hero info is closed
+		if (TutorialManager.isTutorialLevel() && TutorialManager.getState() == TutorialState.HERO_INFO_HINT) {
+			TutorialManager.onAction(TutorialManager.TutorialAction.HERO_INFO_CLOSED);
+		}
 	}
 
 	@Override

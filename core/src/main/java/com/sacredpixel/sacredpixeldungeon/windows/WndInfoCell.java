@@ -32,6 +32,8 @@ import com.sacredpixel.sacredpixeldungeon.scenes.PixelScene;
 import com.sacredpixel.sacredpixeldungeon.tiles.CustomTilemap;
 import com.sacredpixel.sacredpixeldungeon.tiles.DungeonTerrainTilemap;
 import com.sacredpixel.sacredpixeldungeon.tiles.DungeonTilemap;
+import com.sacredpixel.sacredpixeldungeon.tutorial.TutorialManager;
+import com.sacredpixel.sacredpixeldungeon.tutorial.TutorialState;
 import com.sacredpixel.sacredpixeldungeon.ui.RenderedTextBlock;
 import com.sacredpixel.sacredpixeldungeon.ui.Window;
 import com.watabou.noosa.Image;
@@ -158,7 +160,16 @@ public class WndInfoCell extends Window {
 		info.text( desc.length() == 0 ? Messages.get(this, "nothing") : desc );
 		info.maxWidth(WIDTH);
 		info.setPos(titlebar.left(), titlebar.bottom() + 2*GAP);
-		
+
 		resize( WIDTH, (int)info.bottom()+2 );
+	}
+
+	@Override
+	public void hide() {
+		super.hide();
+		// Trigger tutorial progression when tile info is closed
+		if (TutorialManager.isTutorialLevel() && TutorialManager.getState() == TutorialState.EXAMINE_HINT) {
+			TutorialManager.onAction(TutorialManager.TutorialAction.TILE_INFO_CLOSED);
+		}
 	}
 }

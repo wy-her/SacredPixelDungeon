@@ -46,8 +46,12 @@ public class AttackIndicator extends Tag {
 	private static final float DISABLED	= 0.3f;
 
 	private static float delay;
-	
+
 	private static AttackIndicator instance;
+
+	// Tutorial flashing
+	public static boolean tutorialFlashing = false;
+	private static float tutorialFlashTime = 0;
 	
 	private CharSprite sprite = null;
 	
@@ -117,6 +121,15 @@ public class AttackIndicator extends Tag {
 				visible( false );
 				enable( false );
 			}
+		}
+
+		// Tutorial flashing
+		if (tutorialFlashing && bg.visible) {
+			tutorialFlashTime += Game.elapsed;
+			float alpha = (float) Math.abs(Math.cos(tutorialFlashTime * StatusPane.FLASH_RATE));
+			bg.brightness(1f + alpha * 0.5f);
+		} else {
+			tutorialFlashTime = 0;
 		}
 	}
 	

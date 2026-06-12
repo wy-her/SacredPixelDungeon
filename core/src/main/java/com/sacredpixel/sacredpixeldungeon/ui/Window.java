@@ -378,9 +378,8 @@ public class Window extends Group implements Signal.Listener<KeyEvent> {
 	public void onConfirm() {
 		if (focusIndex >= 0 && focusIndex < focusableButtons.size()) {
 			activateFocused();
-		} else {
-			onBackPressed();
 		}
+		// If no button is focused, do nothing (same as WndOptions behavior)
 	}
 
 	public void onBackPressed() {

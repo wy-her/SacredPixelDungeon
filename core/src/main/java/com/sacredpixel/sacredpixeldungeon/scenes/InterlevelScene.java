@@ -45,6 +45,7 @@ import com.sacredpixel.sacredpixeldungeon.levels.Level;
 import com.sacredpixel.sacredpixeldungeon.levels.Terrain;
 import com.sacredpixel.sacredpixeldungeon.levels.TestLevel;
 import com.sacredpixel.sacredpixeldungeon.levels.features.Chasm;
+import com.sacredpixel.sacredpixeldungeon.tutorial.TutorialManager;
 import com.sacredpixel.sacredpixeldungeon.levels.features.LevelTransition;
 import com.sacredpixel.sacredpixeldungeon.levels.rooms.special.SpecialRoom;
 import com.sacredpixel.sacredpixeldungeon.messages.Messages;
@@ -109,6 +110,7 @@ public class InterlevelScene extends PixelScene {
 
 	public static boolean fallIntoPit;
 	public static boolean testLevel = false;
+	public static boolean tutorialLevel = false;
 
 	private enum Phase {
 		FADE_IN, STATIC, FADE_OUT, STAGE_CLEAR
@@ -168,10 +170,13 @@ public class InterlevelScene extends PixelScene {
 	@Override
 	public void create() {
 		super.create();
-		
+
 		String loadingAsset;
 		int loadingDepth;
 		fadeTime = NORM_FADE;
+
+		// Tutorial and Test levels: show entrance.jpg with slow fade, no story
+		boolean isTutorialOrTestLevel = tutorialLevel || testLevel;
 
 		long seed = Dungeon.seed;
 		switch (mode){
@@ -222,10 +227,11 @@ public class InterlevelScene extends PixelScene {
 
 		//for portrait users, each run the splashes change what details they focus on
 		Random.pushGenerator(seed+lastRegion);
-			// Floor 1 (new game) uses ENTRANCE background for "Dungeon" intro
-			if (Dungeon.hero == null && loadingDepth == 1) {
+			// Tutorial/Test levels and Floor 1 (new game) use ENTRANCE background
+			if (isTutorialOrTestLevel || (Dungeon.hero == null && loadingDepth == 1)) {
 				loadingAsset = Assets.Splashes.ENTRANCE;
 				loadingCenter = 400; // center focus
+				fadeTime = SLOW_FADE;
 			} else switch (lastRegion){
 				case 1:
 					loadingAsset = Assets.Splashes.SEWERS;
@@ -325,7 +331,8 @@ public class InterlevelScene extends PixelScene {
 		align(loadingText);
 		add(loadingText);
 
-		if (mode == Mode.DESCEND && lastRegion <= 5){
+		// Tutorial/Test levels skip story completely
+		if (!isTutorialOrTestLevel && mode == Mode.DESCEND && lastRegion <= 5){
 			if (Dungeon.hero == null || (loadingDepth > Statistics.deepestFloor && loadingDepth % 5 == 1)){
 				// Flag this as a story floor; actual story elements will be created
 				// after WndRegionComplete + countdown on story floors (6,11,16,21),
@@ -897,6 +904,23 @@ public class InterlevelScene extends PixelScene {
 	private void descend() throws IOException {
 
 		SacredPixelDungeon.preloadGameAssets();
+
+		// Tutorial level - simple room for new players
+		if (tutorialLevel) {
+			tutorialLevel = false;
+			TutorialManager.reset(); // Reset tutorial state for fresh start
+			Dungeon.hero = null;
+			Mob.clearHeldAllies();
+			Dungeon.initSeed();
+			Dungeon.init();
+			GameLog.wipe();
+			ActionIndicator.clearAction();
+			Dungeon.depth = 1;
+			Level level = new com.sacredpixel.sacredpixeldungeon.levels.TutorialLevel();
+			level.create();
+			Dungeon.switchLevel(level, level.entrance());
+			return;
+		}
 
 		// Test levels always force a fresh start regardless of hero state
 		if (testLevel) {

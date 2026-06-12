@@ -26,6 +26,8 @@ package com.sacredpixel.sacredpixeldungeon.windows;
 
 import com.sacredpixel.sacredpixeldungeon.Chrome;
 import com.sacredpixel.sacredpixeldungeon.scenes.PixelScene;
+import com.sacredpixel.sacredpixeldungeon.tutorial.TutorialManager;
+import com.sacredpixel.sacredpixeldungeon.tutorial.TutorialState;
 import com.sacredpixel.sacredpixeldungeon.ui.RenderedTextBlock;
 import com.sacredpixel.sacredpixeldungeon.ui.Window;
 import com.watabou.noosa.Game;
@@ -87,6 +89,15 @@ public class WndStory extends Window {
 	public void onBackPressed() {
 		if (appearDelay <= 0 && disappearDelay <= 0) {
 			super.onBackPressed();
+		}
+	}
+
+	@Override
+	public void hide() {
+		super.hide();
+		// Trigger tutorial progression when story window is closed
+		if (TutorialManager.isTutorialLevel() && TutorialManager.getState() == TutorialState.INTRO_SHOWN) {
+			TutorialManager.onAction(TutorialManager.TutorialAction.STORY_WINDOW_CLOSED);
 		}
 	}
 

@@ -30,6 +30,8 @@ import com.sacredpixel.sacredpixeldungeon.items.Item;
 import com.sacredpixel.sacredpixeldungeon.journal.Document;
 import com.sacredpixel.sacredpixeldungeon.scenes.GameScene;
 import com.sacredpixel.sacredpixeldungeon.sprites.ItemSpriteSheet;
+import com.sacredpixel.sacredpixeldungeon.tutorial.TutorialManager;
+import com.sacredpixel.sacredpixeldungeon.tutorial.TutorialState;
 import com.sacredpixel.sacredpixeldungeon.windows.WndJournal;
 import com.watabou.noosa.audio.Sample;
 import com.watabou.utils.Bundle;
@@ -54,6 +56,14 @@ public abstract class DocumentPage extends Item {
 	
 	@Override
 	public final boolean doPickUp(Hero hero, int pos) {
+		// Trigger tutorial action when picking up search page
+		if (TutorialManager.isTutorialLevel()
+				&& TutorialManager.getState() == TutorialState.SEARCH_PAGE_SPAWNED
+				&& document() == Document.ADVENTURERS_GUIDE
+				&& Document.GUIDE_SEARCHING.equals(page())) {
+			TutorialManager.onAction(TutorialManager.TutorialAction.SEARCH_PAGE_PICKED_UP);
+		}
+
 		GameScene.pickUpJournal(this, pos);
 		GameScene.flashForDocument(document(), page());
 		if (document() == Document.ADVENTURERS_GUIDE){

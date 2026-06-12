@@ -37,6 +37,8 @@ import com.sacredpixel.sacredpixeldungeon.SacredPixelDungeon;
 import com.sacredpixel.sacredpixeldungeon.actors.hero.HeroClass;
 import com.sacredpixel.sacredpixeldungeon.effects.BannerSprites;
 import com.sacredpixel.sacredpixeldungeon.scenes.InterlevelScene;
+import com.sacredpixel.sacredpixeldungeon.sprites.ItemSprite;
+import com.sacredpixel.sacredpixeldungeon.sprites.ItemSpriteSheet;
 import com.sacredpixel.sacredpixeldungeon.effects.Fireball;
 import com.sacredpixel.sacredpixeldungeon.messages.Messages;
 import com.sacredpixel.sacredpixeldungeon.services.news.News;
@@ -71,6 +73,7 @@ public class TitleScene extends PixelScene {
 	private Image title;
 	private Image titleGlow;
 
+	private StyledButton btnTutorial;
 	private StyledButton btnPlay;
 	private StyledButton btnRankings;
 	private StyledButton btnJournal;
@@ -196,6 +199,24 @@ public class TitleScene extends PixelScene {
 		final Chrome.Type GREY_TR = Chrome.Type.GREY_BUTTON_TR;
 		final int TITLE_BTN_SIZE = 8;
 
+		btnTutorial = new StyledButton(GREY_TR, Messages.get(this, "tutorial"), TITLE_BTN_SIZE){
+			@Override
+			protected void onClick() {
+				GamesInProgress.selectedClass = com.sacredpixel.sacredpixeldungeon.actors.hero.HeroClass.WARRIOR;
+				GamesInProgress.curSlot = GamesInProgress.MAX_SLOTS;
+				try {
+					Dungeon.deleteGame(GamesInProgress.MAX_SLOTS, true);
+				} catch (Exception e) { /* ignore */ }
+				Dungeon.hero = null;
+				InterlevelScene.mode = InterlevelScene.Mode.DESCEND;
+				InterlevelScene.curTransition = null;
+				InterlevelScene.tutorialLevel = true;
+				Game.switchScene(InterlevelScene.class);
+			}
+		};
+		btnTutorial.icon(new ItemSprite(ItemSpriteSheet.MASTERY));
+		add(btnTutorial);
+
 		btnPlay = new StyledButton(GREY_TR, Messages.get(this, "enter"), TITLE_BTN_SIZE){
 			@Override
 			protected void onClick() {
@@ -277,7 +298,7 @@ public class TitleScene extends PixelScene {
 		add(btnAbout);
 		
 		final int BTN_HEIGHT = 20;
-		int GAP = (int)(h - topRegion - 4*BTN_HEIGHT)/4;  // 4 rows now
+		int GAP = (int)(h - topRegion - 5*BTN_HEIGHT)/5;  // 5 rows now (including tutorial)
 		GAP /= 5;
 		GAP = Math.max(GAP, 2);
 
@@ -287,12 +308,15 @@ public class TitleScene extends PixelScene {
 		// Row 1: Play (full width)
 		btnPlay.setRect(btnAreaLeft, insets.top + topRegion+GAP, buttonAreaWidth, BTN_HEIGHT);
 		align(btnPlay);
-		// Row 2: Data (full width)
-		btnData.setRect(btnAreaLeft, btnPlay.bottom()+ GAP, buttonAreaWidth, BTN_HEIGHT);
-		// Row 3: Rankings, Journal (half each)
+		// Row 2: Tutorial (full width)
+		btnTutorial.setRect(btnAreaLeft, btnPlay.bottom()+ GAP, buttonAreaWidth, BTN_HEIGHT);
+		align(btnTutorial);
+		// Row 3: Data (full width)
+		btnData.setRect(btnAreaLeft, btnTutorial.bottom()+ GAP, buttonAreaWidth, BTN_HEIGHT);
+		// Row 4: Rankings, Journal (half each)
 		btnRankings.setRect(btnAreaLeft, btnData.bottom()+ GAP, halfWidth, BTN_HEIGHT);
 		btnJournal.setRect(btnRankings.right()+2, btnRankings.top(), halfWidth, BTN_HEIGHT);
-		// Row 4: Settings, About (half each)
+		// Row 5: Settings, About (half each)
 		btnSettings.setRect(btnAreaLeft, btnRankings.bottom()+ GAP, halfWidth, BTN_HEIGHT);
 		btnAbout.setRect(btnSettings.right()+2, btnSettings.top(), halfWidth, BTN_HEIGHT);
 
@@ -353,12 +377,14 @@ public class TitleScene extends PixelScene {
 
 		// Setup keyboard navigation (order matches button layout)
 		// Row 1: btnPlay (full)
-		// Row 2: btnData (full)
-		// Row 3: btnRankings, btnJournal (half each)
-		// Row 4: btnSettings, btnAbout (half each)
-		// Row 5: btnTestZone (debug only)
+		// Row 2: btnTutorial (full)
+		// Row 3: btnData (full)
+		// Row 4: btnRankings, btnJournal (half each)
+		// Row 5: btnSettings, btnAbout (half each)
+		// Row 6: btnTestZone (debug only)
 		focusableButtons.clear();
 		focusableButtons.add(btnPlay);
+		focusableButtons.add(btnTutorial);
 		focusableButtons.add(btnData);
 		focusableButtons.add(btnRankings);
 		focusableButtons.add(btnJournal);
