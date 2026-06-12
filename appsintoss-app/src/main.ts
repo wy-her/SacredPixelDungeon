@@ -32,6 +32,10 @@ import('@apps-in-toss/web-framework').then(sdk => {
     console.warn('SDK config not available:', e);
 });
 
+// 앱인토스 네비게이션 바 높이 (SafeAreaInsets에 포함되지 않음)
+// SafeAreaInsets.top은 상태바/노치 높이만 반환하므로 네비게이션 바 높이를 별도로 추가
+const NAVIGATION_BAR_HEIGHT = 56;
+
 // SafeAreaInsets 적용 (네비게이션 바 높이 포함)
 function applySafeAreaInsets() {
     const app = document.getElementById('app');
@@ -39,10 +43,13 @@ function applySafeAreaInsets() {
 
     try {
         const insets = SafeAreaInsets.get();
-        app.style.setProperty('--safe-area-top', `${insets.top}px`);
-        console.log('SafeAreaInsets applied:', insets);
+        const totalTop = insets.top + NAVIGATION_BAR_HEIGHT;
+        app.style.setProperty('--safe-area-top', `${totalTop}px`);
+        console.log('SafeAreaInsets applied:', insets, 'Total top:', totalTop);
     } catch (e) {
-        console.warn('SafeAreaInsets not available:', e);
+        // fallback: 네비게이션 바 높이만 적용
+        app.style.setProperty('--safe-area-top', `${NAVIGATION_BAR_HEIGHT}px`);
+        console.warn('SafeAreaInsets not available, using fallback:', e);
     }
 }
 
@@ -55,8 +62,9 @@ try {
         onEvent: (insets) => {
             const app = document.getElementById('app');
             if (app) {
-                app.style.setProperty('--safe-area-top', `${insets.top}px`);
-                console.log('SafeAreaInsets updated:', insets);
+                const totalTop = insets.top + NAVIGATION_BAR_HEIGHT;
+                app.style.setProperty('--safe-area-top', `${totalTop}px`);
+                console.log('SafeAreaInsets updated:', insets, 'Total top:', totalTop);
             }
         }
     });
