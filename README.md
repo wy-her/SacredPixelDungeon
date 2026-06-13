@@ -42,6 +42,7 @@ Sacred Pixel Dungeon is committed to keeping the game **free and accessible** wh
 |----------|-----|-----|
 | **Official Website** | [sacredpixel.net](https://sacredpixel.net) | None |
 | **itch.io** | [sacredpixel.itch.io](https://sacredpixel.itch.io) | None |
+| **ONE Store** (Korea) | [ONE Store](https://m.onestore.co.kr/v2/ko-kr/app/0001006199) | None |
 | **GitHub Pages** | (if deployed) | None |
 | **Self-hosted** | Build from source | None |
 
