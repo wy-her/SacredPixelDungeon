@@ -72,6 +72,7 @@ import com.sacredpixel.sacredpixeldungeon.levels.PrisonLevel;
 import com.sacredpixel.sacredpixeldungeon.levels.RegularLevel;
 import com.sacredpixel.sacredpixeldungeon.levels.SewerBossLevel;
 import com.sacredpixel.sacredpixeldungeon.levels.SewerLevel;
+import com.sacredpixel.sacredpixeldungeon.levels.TutorialLevel;
 import com.sacredpixel.sacredpixeldungeon.levels.VaultLevel;
 import com.sacredpixel.sacredpixeldungeon.levels.features.LevelTransition;
 import com.sacredpixel.sacredpixeldungeon.levels.rooms.secret.SecretRoom;
@@ -695,8 +696,13 @@ public class Dungeon {
 	}
 	
 	public static void saveAll() throws IOException {
+		// Don't save tutorial games - they always start fresh
+		if (level instanceof TutorialLevel) {
+			return;
+		}
+
 		if (hero != null && (hero.isAlive() || WndResurrect.instance != null)) {
-			
+
 			Actor.fixTime();
 			updateLevelExplored();
 			saveLevel( GamesInProgress.curSlot );

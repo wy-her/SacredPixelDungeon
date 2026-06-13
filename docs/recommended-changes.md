@@ -39,6 +39,17 @@ The game uses debug update/news services by default (no-op). To point to your ow
 
 The game supports 23 languages via `.properties` files in `core/src/main/assets/messages/`. To add/remove languages, edit the enum in [Languages.java](/core/src/main/java/com/sacredpixel/sacredpixeldungeon/messages/Languages.java).
 
+## Tutorial System
+
+Sacred Pixel Dungeon includes an interactive tutorial accessible from the title screen. If you're creating a fork:
+
+- **Tutorial messages**: Located in `messages/windows/windows_*.properties` (keys starting with `wndtutorial.`)
+- **Tutorial logic**: `tutorial/TutorialManager.java` and `tutorial/TutorialState.java`
+- **Tutorial level**: `levels/TutorialLevel.java` — a 16x16 room with hidden door
+- **Tutorial mobs**: `actors/mobs/TutorialRat.java` and `TutorialSnake.java` (HP=1)
+
+To customize or disable the tutorial, modify `TutorialManager.java` or remove the tutorial button in `TitleScene.java`.
+
 ## Building for Distribution
 
 ### Web (HTML5)

@@ -35,7 +35,7 @@
             overflow: hidden;
         }
 
-        /* 배너 광고 영역 (하단 고정) */
+        /* 배너 광고 영역 (상단, safe-area 아래) */
         #banner-ad {
             width: 100%;
             height: 96px;
@@ -150,13 +150,13 @@
 </head>
 <body>
     <div id="app">
+        <!-- 배너 광고 영역 (상단) -->
+        <div id="banner-ad"></div>
+
         <!-- 게임 영역 -->
         <div id="game-container">
             <iframe id="game-frame" src="game/index.html"></iframe>
         </div>
-
-        <!-- 배너 광고 영역 (하단) -->
-        <div id="banner-ad"></div>
     </div>
 
     <!-- 종료 확인 모달 -->

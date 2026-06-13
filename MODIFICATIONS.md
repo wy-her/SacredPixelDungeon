@@ -117,12 +117,27 @@ Full keyboard navigation support throughout the game, implemented via a new `Foc
 
 ### In-Game Controls
 
-- **WASD+QEZC**: 8-directional movement
-- **Arrow Keys**: UI navigation
-- **Space**: Cycle targets / Switch tabs
-- **Enter**: Confirm selection
-- **ESC**: Cancel / Close window
-- **F6-F9 / Numpad**: Camera panning
+| Category | Keys | Action |
+|----------|------|--------|
+| **Movement** | WAXD+QEZC / Numpad | 8-directional movement |
+| | Arrow Keys | 4-directional movement |
+| | S / Numpad 5 | Wait or Pickup |
+| **Combat** | F | Attack target |
+| | G | Use action ability |
+| | V | Pick up loot |
+| | Space / Tab | Cycle targets |
+| **UI** | R | Examine mode |
+| | T | Wait one turn |
+| | Y | Rest until healed |
+| | H | Hero info |
+| | J | Journal |
+| | 1-6 | Quickslots |
+| | 7 / ' | Inventory |
+| **Camera** | [ / ] | Zoom out / in |
+| | O/K/./; | Pan up/left/down/right |
+| | L | Center on hero |
+| **Navigation** | Enter | Confirm |
+| | ESC / Backspace | Back / Cancel |
 
 ---
 
@@ -221,6 +236,44 @@ Save data can be transferred between devices via URL encoding.
 
 - **Daily Challenge**: Removed due to web game characteristics (same seed exploitable across browsers)
 - **Monk/Golem Quest Alternative**: Unified to Senior Monk quest only
+
+---
+
+## Interactive Tutorial System
+
+A beginner-friendly tutorial teaches core game mechanics in approximately 1 minute.
+
+### Tutorial Flow (10 Steps)
+
+| Step | State | Description |
+|------|-------|-------------|
+| 1 | GUIDEBOOK_PLACED | Pick up the guidebook |
+| 2 | INTRO_SHOWN | Story introduction window |
+| 3 | JOURNAL_HINT | Tap flashing journal button |
+| 4 | HERO_INFO_HINT | Tap flashing hero portrait |
+| 5 | EXAMINE_HINT | Tap magnifying glass, examine a tile |
+| 6 | RAT_COMBAT | Fight a tutorial rat (HP=1) |
+| 7 | ITEM_USE | Use a potion (drink or throw) |
+| 8 | SEARCH_HINT | Search for hidden door |
+| 9 | SNAKE_SURPRISE | Surprise attack a snake |
+| 10 | COMPLETED | Tutorial complete → return to title |
+
+### Implementation
+
+| File | Purpose |
+|------|---------|
+| `tutorial/TutorialState.java` | 17-state enum for progress tracking |
+| `tutorial/TutorialManager.java` | State machine and event handling |
+| `windows/WndTutorial.java` | Tutorial hint windows |
+| `levels/TutorialLevel.java` | 16x16 tutorial map with hidden room |
+| `actors/mobs/TutorialRat.java` | Tutorial rat (HP=1) |
+| `actors/mobs/TutorialSnake.java` | Tutorial snake (HP=1) |
+
+### Key Features
+
+- **Button flashing**: Visual cues guide players to correct UI elements
+- **No save**: Tutorial games don't save to in-progress slots
+- **Localized**: All messages available in 23 languages
 
 ---
 

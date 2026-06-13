@@ -1,6 +1,8 @@
 # Sacred Pixel Dungeon
 
-Sacred Pixel Dungeon is an HTML5 cross-platform roguelike dungeon crawler and a fan-made fork of [Shattered Pixel Dungeon](https://shatteredpixel.com/shatteredpd/) by [Evan Debenham (00-Evan)](https://github.com/00-Evan). It runs directly in web browsers on both desktop and mobile devices.
+Sacred Pixel Dungeon is an HTML5 cross-platform roguelike dungeon crawler and a fan-made fork of [Shattered Pixel Dungeon](https://shatteredpixel.com/shatteredpd/) by [Evan Debenham (00-Evan)](https://github.com/00-Evan).
+
+This project serves as a **gateway to Pixel Dungeon games** — helping new players discover this amazing roguelike genre through accessible browser-based gameplay.
 
 ## Play Now
 
@@ -16,6 +18,20 @@ Sacred Pixel Dungeon is an HTML5 cross-platform roguelike dungeon crawler and a 
 
 ---
 
+## Why This Project Exists
+
+We created Sacred Pixel Dungeon to **spread the love of Pixel Dungeon** to a wider audience:
+
+- **Zero-friction access** — Play instantly in any browser, no app installation needed
+- **Full keyboard accessibility** — Play entirely without a mouse for accessibility needs
+- **Beginner-friendly tutorial** — Interactive 1-minute tutorial teaches core mechanics step by step
+- **UI/UX improvements** — Enhanced interface and quality-of-life features
+- **Balance adjustments** — Tweaked gameplay for web platform characteristics
+
+Our goal is to introduce more players to the Pixel Dungeon family of games. We encourage players who enjoy Sacred Pixel Dungeon to also try [Shattered Pixel Dungeon](https://shatteredpixel.com/shatteredpd/) and other community forks!
+
+---
+
 ## Distribution & Monetization
 
 Sacred Pixel Dungeon is committed to keeping the game **free and accessible** while supporting ongoing development.
@@ -25,6 +41,7 @@ Sacred Pixel Dungeon is committed to keeping the game **free and accessible** wh
 | Platform | URL | Ads |
 |----------|-----|-----|
 | **Official Website** | [sacredpixel.net](https://sacredpixel.net) | None |
+| **itch.io** | [sacredpixel.itch.io](https://sacredpixel.itch.io) | None |
 | **GitHub Pages** | (if deployed) | None |
 | **Self-hosted** | Build from source | None |
 
@@ -32,19 +49,20 @@ The game is **completely free** with **no advertisements** on our official websi
 
 ### Apps in Toss (Korea Only)
 
-The [Apps in Toss](https://toss.im/) version includes **non-intrusive banner ads** to support development costs.
+The [Apps in Toss](https://toss.im/) version includes **banner ads** and **interstitial ads** to support development costs.
 
 **Why ads on this platform?**
 - HTML5 porting requires ongoing maintenance
-- Ad revenue funds new content updates and bug fixes
+- Ad revenue covers maintenance costs and development labor
+- **Remaining revenue is reinvested in marketing** to introduce more players to Pixel Dungeon games
 - Users who prefer ad-free experience can play at [sacredpixel.net](https://sacredpixel.net)
 
 ### Respect for the Original
 
-We deeply respect Shattered Pixel Dungeon and its creator Evan Debenham. To avoid any conflict:
+We deeply respect Shattered Pixel Dungeon and its creator Evan Debenham:
 
-- **We do NOT distribute on platforms where Shattered Pixel Dungeon is available** (Google Play, App Store, itch.io, etc.)
-- This project exists to bring the game to **web browsers** — a platform the original does not target
+- This project exists primarily to bring the game to **web browsers** — a platform the original does not target
+- We aim to complement, not compete with, the original game
 - All code changes are open source under GPLv3, as required by the original license
 
 ---
@@ -174,6 +192,8 @@ This program is free software: you can redistribute it and/or modify it under th
 ### Key Changes from Original
 
 - **Platform**: Runs in any modern web browser — no app installation needed
-- **Accessibility**: Full keyboard navigation support (arrow keys, WAXD, Tab)
+- **Tutorial**: Interactive 1-minute tutorial for new players
+- **Accessibility**: Full keyboard navigation support (arrow keys, WAXD+QEZC, Tab) — playable without a mouse
 - **Cross-device sync**: Export/import save data via URL for seamless device switching
+- **UI/UX improvements**: Enhanced interface, improved window behavior, better input handling
 - **Balance tweaks**: Reworked Berserker talents, Imp quest, and Chaotic Censer for web play

@@ -221,14 +221,17 @@ public class WndTutorial extends Window {
 		);
 	}
 
-	// Step 16a: Wait for snake hint - Hourglass icon
+	// Step 16a: Wait for snake hint - Wait button icon
 	public static WndTutorial createWaitHint() {
 		String key = getKeyString(SPDAction.WAIT);
 		String msg = Messages.get(WndTutorial.class, "wait_msg", key);
 		GLog.p(msg.replace("\n\n", "\n"));
 		TutorialManager.stopFlashExamine();
+		// Use the actual wait button icon from toolbar (176, 0, 16, 16)
+		Image waitIcon = new Image(Assets.Interfaces.TOOLBAR);
+		waitIcon.frame(176, 0, 16, 16);
 		return new WndTutorial(
-				new ItemSprite(ItemSpriteSheet.ARTIFACT_HOURGLASS),
+				waitIcon,
 				Messages.get(WndTutorial.class, "wait_title"),
 				msg
 		);

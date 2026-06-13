@@ -524,15 +524,17 @@ function loadBannerAd() {
     }
 }
 
-// 게임 iframe 높이 조정
+// 게임 iframe 높이 조정 (safe-area + 배너 높이 제외)
 function adjustGameHeight() {
+    const app = document.getElementById('app');
     const banner = document.getElementById('banner-ad');
     const gameContainer = document.getElementById('game-container');
 
-    if (banner && gameContainer) {
+    if (app && banner && gameContainer) {
+        const safeAreaTop = parseInt(getComputedStyle(app).paddingTop) || 0;
         const bannerHeight = banner.offsetHeight;
         const windowHeight = window.innerHeight;
-        gameContainer.style.height = `${windowHeight - bannerHeight}px`;
+        gameContainer.style.height = `${windowHeight - safeAreaTop - bannerHeight}px`;
     }
 }
 
